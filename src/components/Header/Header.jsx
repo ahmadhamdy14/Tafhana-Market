@@ -1,5 +1,6 @@
 import { Link, useNavigate } from "react-router-dom";
-import { useContext, useState } from "react";
+import { useContext, useState, useEffect } from "react";
+import { listenToPendingOrdersCount } from "../../services/orderService";
 import { ThemeContext } from "../../context/ThemeContext";
 import { AuthContext } from "../../context/AuthContext";
 import { CartContext } from "../../context/CartContext";
@@ -15,7 +16,17 @@ const Header = () => {
   const { favoritesCount } = useContext(FavoritesContext);
 
   const [open, setOpen] = useState(false);
+  const [pendingOrdersCount, setPendingOrdersCount] = useState(0);
   const navigate = useNavigate();
+
+  useEffect(() => {
+    if (userData?.role === "admin") {
+      const unsubscribe = listenToPendingOrdersCount((count) => {
+        setPendingOrdersCount(count);
+      });
+      return () => unsubscribe();
+    }
+  }, [userData?.role]);
 
   const handleLogout = async () => {
     await signOut(auth);
@@ -28,9 +39,9 @@ const Header = () => {
         {/* LOGO */}
         <div className="logo-container">
           <Link to="/">
-            <img src="/favicon2.png" alt="Logo" className="logo-icon" />
+            <img src="/favicon1.png" alt="Logo" className="logo-icon" />
           </Link>
-          <Link to="/" className="logo" style={{ fontSize: "20px", fontWeight: "bold" }}>Attar Hub</Link>
+          <Link to="/" className="logo" style={{ fontSize: "20px", fontWeight: "bold" }}>تفهنا ماركت</Link>
         </div>
         {/* HAMBURGER */}
         <div style={{ display: "flex", alignItems: "center", position: "relative", gap: "15px" }}>
@@ -69,7 +80,7 @@ const Header = () => {
                 تسجيل الدخول
               </Link>
               <Link to="/register" onClick={() => setOpen(false)}>
-                تسجيل حساب جديد
+                انشاء حساب
               </Link>
             </>
           )}
@@ -81,10 +92,15 @@ const Header = () => {
               {userData?.role === "admin" && (
                 <>
                   <Link to="/admin" onClick={() => setOpen(false)}>
-                    الادمن
+                    🛠️ لوحة التحكم
                   </Link>
-                  <Link to="/admin/orders" onClick={() => setOpen(false)}>
-                    الطلبات
+                  <Link to="/admin/orders" className="cart-link" onClick={() => setOpen(false)} style={{ display: 'flex', gap: '5px' }}>
+                    {pendingOrdersCount > 0 && (
+                      <span className="cart-badge" style={{ position: 'static', transform: 'none', background: '#ef4444', color: 'white', padding: '2px 6px', borderRadius: '50%', fontSize: '12px' }}>
+                        {pendingOrdersCount}
+                      </span>
+                    )}
+                    طلبات العملاء
                   </Link>
                 </>
               )}

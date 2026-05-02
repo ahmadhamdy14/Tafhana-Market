@@ -17,7 +17,6 @@ import { auth, db } from "../../firebase";
 import { createUserWithEmailAndPassword } from "firebase/auth";
 import { doc, setDoc } from "firebase/firestore";
 import { toast } from "react-toastify";
-import { signOut } from "firebase/auth";
 
 
 
@@ -139,10 +138,8 @@ const Register = () => {
         createdAt: new Date(),
       });
 
-      await signOut(auth);
       toast.success("تم تسجيل الدخول بنجاح 🎉");
-      navigate("/login");
-
+      navigate("/products");
     } catch (error) {
       if (error.code === "auth/email-already-in-use") {
         toast.error("هذا البريد الالكتروني مسجل بالفعل . ");
@@ -270,14 +267,16 @@ const Register = () => {
 
         {/* BUTTON */}
         <button className="register-btn" onClick={handleSubmit}>
-          {loading ? "جاري التحميل..." : "إنشاء حساب"}
+          {loading ? "Loading..." : "Register"}
         </button>
-
         {errors.general && (
           <p className="error" style={{ textAlign: "center", marginTop: "10px", fontSize: "14px", fontWeight: "bold" }}>
             {errors.general}
           </p>
         )}
+        <p className="sub-text" style={{ textAlign: "center" }}>
+          امتلك حساب بالفعل؟ <Link to="/login" className="link">تسجيل الدخول</Link>
+        </p>
 
       </div>
     </div>

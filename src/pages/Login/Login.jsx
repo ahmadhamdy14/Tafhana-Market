@@ -162,6 +162,9 @@ const Login = () => {
         <button className="login-btn" onClick={handleLogin}>
           {loading ? "جاري التحميل..." : "تسجيل الدخول"}
         </button>
+        <p className="sub-text" style={{ textAlign: "center" }}>
+          ليس لديك حسابا؟ <Link to="/register" className="link">اضغط هنا</Link>
+        </p>
       </div>
     </div>
   );

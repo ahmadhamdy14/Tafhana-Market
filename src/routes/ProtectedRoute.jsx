@@ -8,15 +8,14 @@ const ProtectedRoute = ({ children }) => {
 
   useEffect(() => {
     if (!user) {
-      toast.error("Please login first 🔐");
+      toast.error("من فضلك سجل دخول🔐");
     }
   }, [user]);
 
   if (!user) {
     return <Navigate to="/login" />;
   }
-  if (user) {
-  }
+
   return children;
 };
 export default ProtectedRoute;

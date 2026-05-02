@@ -7,12 +7,12 @@ const AdminRoute = ({ children }) => {
   const { user, userData } = useContext(AuthContext);
 
   if (!user) {
-    toast.error("Please login first 🔐");
+    toast.error("من فضلك سجل دخول🔐 ");
     return <Navigate to="/login" />;
   }
 
   if (userData?.role !== "admin") {
-    toast.error("Access denied 🚫 Admins only");
+    toast.error("هذه الصفحة للمدير فقط🚫 ");
     return <Navigate to="/" />;
   }
 

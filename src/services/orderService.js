@@ -10,6 +10,7 @@ import {
   orderBy,
   query,
   where,
+  onSnapshot,
 } from "firebase/firestore";
 import { db } from "../firebase";
 
@@ -113,3 +114,17 @@ export const deleteOldOrders = async (orders) => {
   const deletedIds = new Set(toDelete.map((o) => o.id));
   return orders.filter((o) => !deletedIds.has(o.id));
 };
+
+/**
+ * Listen to the count of pending orders (for admin badge).
+ */
+export const listenToPendingOrdersCount = (callback) => {
+  const q = query(
+    collection(db, ORDERS_COLLECTION),
+    where("status", "==", "pending")
+  );
+  return onSnapshot(q, (snapshot) => {
+    callback(snapshot.docs.length);
+  });
+};
+
