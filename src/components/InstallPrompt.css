@@ -1,0 +1,288 @@
+/* ═══════════════════════════════════════════════
+   InstallPrompt — centered modal popup
+   ═══════════════════════════════════════════════ */
+
+/* ── Backdrop ─────────────────────────────────── */
+.ip-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 9999;
+  background: rgba(0, 0, 0, 0.55);
+  backdrop-filter: blur(6px);
+  -webkit-backdrop-filter: blur(6px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1rem;
+  animation: ipBackdropIn 0.3s ease both;
+}
+
+.ip-backdrop--out {
+  animation: ipBackdropOut 0.35s ease both;
+}
+
+@keyframes ipBackdropIn {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+
+@keyframes ipBackdropOut {
+  from { opacity: 1; }
+  to   { opacity: 0; }
+}
+
+/* ── Card ─────────────────────────────────────── */
+.ip-card {
+  position: relative;
+  width: 100%;
+  max-width: 380px;
+  background: #ffffff;
+  border-radius: 28px;
+  padding: 2rem 1.75rem 1.75rem;
+  text-align: center;
+  box-shadow:
+    0 32px 80px rgba(0, 0, 0, 0.22),
+    0 8px 24px rgba(0, 0, 0, 0.1);
+  animation: ipCardIn 0.4s cubic-bezier(0.34, 1.56, 0.64, 1) both;
+  overflow: hidden;
+}
+
+/* Subtle top gradient accent */
+.ip-card::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 5px;
+  background: linear-gradient(90deg, #16a34a, #4ade80, #16a34a);
+  background-size: 200% 100%;
+  animation: shimmer 3s linear infinite;
+}
+
+@keyframes shimmer {
+  0%   { background-position: 200% 0; }
+  100% { background-position: -200% 0; }
+}
+
+.ip-card--out {
+  animation: ipCardOut 0.35s ease both;
+}
+
+@keyframes ipCardIn {
+  from {
+    opacity: 0;
+    transform: scale(0.85) translateY(30px);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+  }
+}
+
+@keyframes ipCardOut {
+  from {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+  }
+  to {
+    opacity: 0;
+    transform: scale(0.9) translateY(20px);
+  }
+}
+
+/* ── Close button ─────────────────────────────── */
+.ip-close {
+  position: absolute;
+  top: 1rem;
+  left: 1rem;
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  border: none;
+  background: #f1f5f9;
+  color: #64748b;
+  font-size: 0.9rem;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background 0.2s, color 0.2s, transform 0.15s;
+  line-height: 1;
+}
+
+.ip-close:hover {
+  background: #e2e8f0;
+  color: #1e293b;
+  transform: scale(1.1);
+}
+
+/* ── App icon ─────────────────────────────────── */
+.ip-icon-wrap {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 1.25rem;
+}
+
+.ip-icon {
+  width: 80px;
+  height: 80px;
+  border-radius: 20px;
+  object-fit: cover;
+  box-shadow: 0 8px 24px rgba(22, 163, 74, 0.3);
+  position: relative;
+  z-index: 1;
+}
+
+/* Pulsing ring behind the icon */
+.ip-icon-ring {
+  position: absolute;
+  inset: -8px;
+  border-radius: 28px;
+  border: 2px solid rgba(22, 163, 74, 0.25);
+  animation: pulse-ring 2.2s ease-out infinite;
+}
+
+@keyframes pulse-ring {
+  0%   { transform: scale(0.9);  opacity: 0.7; }
+  70%  { transform: scale(1.15); opacity: 0;   }
+  100% { transform: scale(0.9);  opacity: 0;   }
+}
+
+/* ── Text ─────────────────────────────────────── */
+.ip-title {
+  font-size: 1.3rem;
+  font-weight: 800;
+  color: #0f172a;
+  margin: 0 0 0.6rem;
+  letter-spacing: -0.3px;
+  line-height: 1.3;
+}
+
+.ip-desc {
+  font-size: 0.875rem;
+  color: #475569;
+  line-height: 1.65;
+  margin: 0 0 1.1rem;
+}
+
+/* ── Feature pills ────────────────────────────── */
+.ip-features {
+  list-style: none;
+  margin: 0 0 1.5rem;
+  padding: 0;
+  display: flex;
+  justify-content: center;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+}
+
+.ip-features li {
+  background: #f0fdf4;
+  color: #15803d;
+  border: 1px solid #bbf7d0;
+  border-radius: 999px;
+  padding: 0.3rem 0.75rem;
+  font-size: 0.78rem;
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+/* ── Action buttons ───────────────────────────── */
+.ip-actions {
+  display: flex;
+  flex-direction: column;
+  gap: 0.65rem;
+}
+
+.ip-btn {
+  width: 100%;
+  padding: 0.8rem 1rem;
+  border-radius: 14px;
+  border: none;
+  font-size: 0.9375rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: transform 0.15s, box-shadow 0.15s, background 0.2s;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+}
+
+/* Install — primary green */
+.ip-btn--install {
+  background: linear-gradient(135deg, #16a34a 0%, #15803d 100%);
+  color: #ffffff;
+  box-shadow: 0 6px 20px rgba(22, 163, 74, 0.4);
+}
+
+.ip-btn--install:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 10px 28px rgba(22, 163, 74, 0.5);
+}
+
+.ip-btn--install:active {
+  transform: translateY(0);
+  box-shadow: 0 4px 12px rgba(22, 163, 74, 0.35);
+}
+
+/* Maybe later — ghost */
+.ip-btn--later {
+  background: transparent;
+  color: #64748b;
+  font-weight: 500;
+  font-size: 0.875rem;
+}
+
+.ip-btn--later:hover {
+  color: #334155;
+  background: #f8fafc;
+}
+
+/* ── Dark mode ────────────────────────────────── */
+@media (prefers-color-scheme: dark) {
+  .ip-card {
+    background: #0f172a;
+    box-shadow:
+      0 32px 80px rgba(0, 0, 0, 0.6),
+      0 8px 24px rgba(0, 0, 0, 0.4);
+  }
+
+  .ip-close {
+    background: #1e293b;
+    color: #94a3b8;
+  }
+
+  .ip-close:hover {
+    background: #334155;
+    color: #e2e8f0;
+  }
+
+  .ip-title { color: #f1f5f9; }
+  .ip-desc  { color: #94a3b8; }
+
+  .ip-features li {
+    background: #14532d;
+    color: #4ade80;
+    border-color: #166534;
+  }
+
+  .ip-btn--later {
+    color: #94a3b8;
+  }
+
+  .ip-btn--later:hover {
+    color: #cbd5e1;
+    background: #1e293b;
+  }
+}
+
+/* ── Mobile tweak ─────────────────────────────── */
+@media (max-width: 400px) {
+  .ip-card { padding: 1.75rem 1.25rem 1.5rem; }
+  .ip-icon { width: 68px; height: 68px; }
+  .ip-title { font-size: 1.15rem; }
+}
