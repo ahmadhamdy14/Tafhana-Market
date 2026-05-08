@@ -7,6 +7,7 @@ import { CartContext } from "../../context/CartContext";
 import { FavoritesContext } from "../../context/FavoritesContext";
 import { auth } from "../../firebase";
 import { signOut } from "firebase/auth";
+import InstallButton from "../InstallButton/InstallButton";
 import "./Header.css";
 
 const Header = () => {
@@ -71,6 +72,8 @@ const Header = () => {
           <button onClick={toggleTheme} className="theme-btn">
             {theme === "light" ? "🌙" : "☀️"}
           </button>
+          {/* Install button — full label visible in desktop nav */}
+          <InstallButton variant="navbar" />
           <Link to="/products" onClick={() => setOpen(false)}>
             المنتجات
           </Link>

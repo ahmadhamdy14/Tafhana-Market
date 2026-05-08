@@ -1,71 +1,85 @@
-import { useState, useEffect, useContext, useCallback } from "react";
-import { AuthContext } from "../context/AuthContext";
+import { useState, useEffect, useCallback, useRef } from "react";
+import { usePWA } from "../context/PWAContext";
 import "./InstallPrompt.css";
 
-/* ─── Helpers ─────────────────────────────────────────── */
-const STORAGE_KEY = "pwa_install_dismissed";
+/* ─── Constants ───────────────────────────────── */
+const REMIND_INTERVAL_MS = 30 * 60 * 1000; // 30 minutes
+const INITIAL_DELAY_MS   = 2000;            // 2 s after page load
+const KEY_LAST_DISMISSED = "pwa_last_dismissed";
 
-const isInstalled = () =>
-  window.matchMedia("(display-mode: standalone)").matches ||
-  window.navigator.standalone === true;
+/* ─── Helpers ─────────────────────────────────── */
+const isReminderDue = () => {
+  const last = parseInt(localStorage.getItem(KEY_LAST_DISMISSED) || "0", 10);
+  return Date.now() - last >= REMIND_INTERVAL_MS;
+};
 
-/* ─── Component ───────────────────────────────────────── */
+const msUntilNextReminder = () => {
+  const last = parseInt(localStorage.getItem(KEY_LAST_DISMISSED) || "0", 10);
+  return Math.max(0, REMIND_INTERVAL_MS - (Date.now() - last));
+};
+
+/* ─── Component ───────────────────────────────── */
 export default function InstallPrompt() {
-  const { user } = useContext(AuthContext);
+  const { canInstall, triggerInstall } = usePWA();
 
-  const [deferredPrompt, setDeferredPrompt] = useState(null);
-  const [visible, setVisible]             = useState(false);
-  const [animOut, setAnimOut]             = useState(false);
+  const [visible, setVisible] = useState(false);
+  const [animOut, setAnimOut] = useState(false);
 
-  /* 1. Capture the browser's native install event */
+  const showTimerRef   = useRef(null);
+  const repeatTimerRef = useRef(null);
+
+  /* ── Schedule the first show once canInstall becomes true ── */
   useEffect(() => {
-    const handler = (e) => {
-      e.preventDefault();
-      setDeferredPrompt(e);
+    if (!canInstall) return;
+
+    const delay = isReminderDue()
+      ? INITIAL_DELAY_MS
+      : msUntilNextReminder() + INITIAL_DELAY_MS;
+
+    showTimerRef.current = setTimeout(() => setVisible(true), delay);
+
+    return () => {
+      clearTimeout(showTimerRef.current);
+      clearTimeout(repeatTimerRef.current);
     };
-    window.addEventListener("beforeinstallprompt", handler);
-    return () => window.removeEventListener("beforeinstallprompt", handler);
-  }, []);
+  }, [canInstall]);
 
-  /* 2. Show modal only when: user is logged in + not installed + not dismissed */
-  useEffect(() => {
-    if (!user)              return; // wait for login
-    if (isInstalled())      return; // already installed
-    if (!deferredPrompt)    return; // browser doesn't support / already installed
-    if (localStorage.getItem(STORAGE_KEY)) return; // user dismissed before
+  /* ── Schedule the next reminder 30 min after a dismiss ── */
+  const scheduleRepeat = useCallback(() => {
+    clearTimeout(repeatTimerRef.current);
+    repeatTimerRef.current = setTimeout(() => {
+      if (canInstall) setVisible(true);
+      scheduleRepeat();
+    }, REMIND_INTERVAL_MS);
+  }, [canInstall]);
 
-    // Small delay so the page fully loads first
-    const timer = setTimeout(() => setVisible(true), 1500);
-    return () => clearTimeout(timer);
-  }, [user, deferredPrompt]);
+  /* ── Dismiss: animate out, optionally save timestamp & reschedule ── */
+  const dismiss = useCallback(
+    (saveDismissTime = true) => {
+      setAnimOut(true);
+      setTimeout(() => {
+        setVisible(false);
+        setAnimOut(false);
+        if (saveDismissTime) {
+          localStorage.setItem(KEY_LAST_DISMISSED, String(Date.now()));
+          scheduleRepeat();
+        }
+      }, 350);
+    },
+    [scheduleRepeat]
+  );
 
-  /* 3. Dismiss with exit animation */
-  const dismiss = useCallback((persist = true) => {
-    if (persist) localStorage.setItem(STORAGE_KEY, "1");
-    setAnimOut(true);
-    setTimeout(() => {
-      setVisible(false);
-      setAnimOut(false);
-    }, 350);
-  }, []);
-
-  /* 4. Trigger native install */
+  /* ── Install: delegate to PWAContext, dismiss cleanly on any outcome ── */
   const handleInstall = useCallback(async () => {
-    if (!deferredPrompt) return;
-    deferredPrompt.prompt();
-    const { outcome } = await deferredPrompt.userChoice;
-    if (outcome === "accepted") {
-      setDeferredPrompt(null);
-      dismiss(false); // no need to persist — app is installed
-    }
-    // If dismissed by user inside the native dialog, keep our modal open or close quietly
-    else {
-      dismiss(true);
-    }
-  }, [deferredPrompt, dismiss]);
+    const accepted = await triggerInstall();
+    // If accepted, canInstall becomes false → prompt disappears automatically.
+    // If cancelled, treat as a dismissal so the 30-min cycle restarts.
+    if (!accepted) dismiss(true);
+    else dismiss(false);
+  }, [triggerInstall, dismiss]);
 
-  /* Nothing to render */
-  if (!visible) return null;
+  /* ── Nothing to show ── */
+  if (!visible || !canInstall) return null;
 
   return (
     <div
@@ -73,59 +87,57 @@ export default function InstallPrompt() {
       onClick={() => dismiss(true)}
       role="dialog"
       aria-modal="true"
-      aria-label="تثبيت التطبيق"
+      aria-label="install-dialog"
     >
-      {/* Stop click propagation so clicking inside the card doesn't close it */}
       <div
         className={`ip-card${animOut ? " ip-card--out" : ""}`}
         onClick={(e) => e.stopPropagation()}
       >
-        {/* Close × */}
-        <button
-          className="ip-close"
-          onClick={() => dismiss(true)}
-          aria-label="إغلاق"
-        >
-          ✕
+        {/* Close */}
+        <button className="ip-close" onClick={() => dismiss(true)} aria-label="close">
+          &#x2715;
         </button>
 
         {/* Icon */}
         <div className="ip-icon-wrap">
           <img
             src="/pwa-192x192.png"
-            alt="تفهنا ماركت"
+            alt="tafhana"
             className="ip-icon"
             draggable="false"
           />
           <span className="ip-icon-ring" />
         </div>
 
-        {/* Text */}
-        <h2 className="ip-title">ثبّت تفهنا ماركت</h2>
+        {/* Copy */}
+        <h2 className="ip-title">{"ثبّت تفهنا ماركت"}</h2>
         <p className="ip-desc">
-          احصل على تجربة تسوق أسرع وأسهل — يعمل بدون إنترنت ويفتح مباشرةً من
-          شاشتك الرئيسية مثل تطبيق حقيقي!
+          {"احصل على تجربة تسوق أسرع وأسهل — يعمل بدون إنترنت ويفتح مباشرةً من شاشتك الرئيسية مثل تطبيق حقيقي!"}
         </p>
 
         {/* Feature pills */}
         <ul className="ip-features">
-          <li>⚡ سريع وخفيف</li>
-          <li>📶 يعمل بدون نت</li>
-          <li>🔔 إشعارات فورية</li>
+          <li>{"⚡ سريع وخفيف"}</li>
+          <li>{"📶 يعمل بدون نت"}</li>
+          <li>{"🔔 إشعارات فورية"}</li>
         </ul>
 
         {/* Actions */}
         <div className="ip-actions">
           <button className="ip-btn ip-btn--install" onClick={handleInstall}>
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="none"
-              stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
-              <path d="M12 16l-4-4m4 4l4-4m-4 4V4"/>
-              <path d="M4 20h16"/>
+            <svg
+              width="18" height="18" viewBox="0 0 24 24" fill="none"
+              stroke="currentColor" strokeWidth="2.2"
+              strokeLinecap="round" strokeLinejoin="round"
+            >
+              <path d="M12 16l-4-4m4 4l4-4m-4 4V4" />
+              <path d="M4 20h16" />
             </svg>
-            تثبيت التطبيق
+            {"تثبيت التطبيق"}
           </button>
+
           <button className="ip-btn ip-btn--later" onClick={() => dismiss(true)}>
-            ربما لاحقاً
+            {"ربما لاحقاً"}
           </button>
         </div>
       </div>
