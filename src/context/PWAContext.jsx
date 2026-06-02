@@ -27,6 +27,13 @@ export function PWAProvider({ children }) {
 
   /* Capture the native browser event — fires only once per page load */
   useEffect(() => {
+    // 1. Consume the pre-captured event if it already fired before React mounted
+    if (window.deferredPrompt) {
+      setDeferredPrompt(window.deferredPrompt);
+      setIsSupported(true);
+      setIsInstalled(false);
+    }
+
     const handler = (e) => {
       // Prevent the default browser mini-infobar prompt
       e.preventDefault();
@@ -44,8 +51,33 @@ export function PWAProvider({ children }) {
       setDeferredPrompt(null);
     };
 
+    /* Handle pre-captured event notification from index.html */
+    const onPreCaptured = () => {
+      if (window.deferredPrompt) {
+        setDeferredPrompt(window.deferredPrompt);
+        setIsSupported(true);
+        setIsInstalled(false);
+      }
+    };
+
     window.addEventListener("beforeinstallprompt", handler);
     window.addEventListener("appinstalled", onAppInstalled);
+    window.addEventListener("pwa-deferred-prompt-ready", onPreCaptured);
+
+    /* Watch for standalone display mode changes */
+    const mediaQuery = window.matchMedia("(display-mode: standalone)");
+    const onDisplayModeChange = (e) => {
+      if (e.matches) {
+        localStorage.setItem(KEY_INSTALLED, "1");
+        setIsInstalled(true);
+      }
+    };
+
+    if (mediaQuery.addEventListener) {
+      mediaQuery.addEventListener("change", onDisplayModeChange);
+    } else {
+      mediaQuery.addListener(onDisplayModeChange);
+    }
 
     // Initial check: if already in standalone mode, PWA is installed and supported
     if (isRunningInstalled()) {
@@ -66,6 +98,12 @@ export function PWAProvider({ children }) {
     return () => {
       window.removeEventListener("beforeinstallprompt", handler);
       window.removeEventListener("appinstalled", onAppInstalled);
+      window.removeEventListener("pwa-deferred-prompt-ready", onPreCaptured);
+      if (mediaQuery.removeEventListener) {
+        mediaQuery.removeEventListener("change", onDisplayModeChange);
+      } else {
+        mediaQuery.removeListener(onDisplayModeChange);
+      }
       clearTimeout(unsupportedTimer);
     };
   }, []);
