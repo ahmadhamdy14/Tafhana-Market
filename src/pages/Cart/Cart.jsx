@@ -48,7 +48,6 @@ const Cart = () => {
     msg += `📦 *المنتجات:*\n`;
 
     items.forEach((item, i) => {
-      const finalPrice = item.price - (item.price * (item.discount || 0)) / 100;
       msg += `\n${i + 1}. ${item.name}\n`;
       msg += `   الكمية: ${item.qty}\n`;
     });

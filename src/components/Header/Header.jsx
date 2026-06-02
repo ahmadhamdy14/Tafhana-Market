@@ -77,6 +77,9 @@ const Header = () => {
           <Link to="/products" onClick={() => setOpen(false)}>
             المنتجات
           </Link>
+          <Link to="/medical" onClick={() => setOpen(false)}>
+            الخدمات الطبية 🩺
+          </Link>
           {!user && (
             <>
               <Link to="/login" onClick={() => setOpen(false)}>

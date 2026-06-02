@@ -1,0 +1,351 @@
+.medical-services-container {
+  padding: 40px 20px;
+  background: var(--bg);
+  min-height: 100vh;
+  color: var(--text);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+/* 🩺 PAGE HEADER */
+.medical-header {
+  text-align: center;
+  margin-bottom: 40px;
+  max-width: 800px;
+}
+
+.medical-header h1 {
+  font-size: 34px;
+  font-weight: 800;
+  margin-bottom: 12px;
+  background: linear-gradient(90deg, #16a34a, #8b5cf6);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+.medical-header p {
+  font-size: 16px;
+  color: var(--sub);
+  line-height: 1.6;
+}
+
+/* 🏷️ TABS SWITCHER */
+.medical-tabs {
+  display: flex;
+  gap: 15px;
+  margin-bottom: 40px;
+  background: var(--bg-right);
+  padding: 8px;
+  border-radius: 16px;
+  border: 1px solid var(--border);
+}
+
+.tab-btn {
+  padding: 12px 24px;
+  border: none;
+  background: transparent;
+  color: var(--text);
+  font-size: 16px;
+  font-weight: 700;
+  cursor: pointer;
+  border-radius: 12px;
+  transition: all 0.25s ease;
+}
+
+.tab-btn:hover {
+  background: rgba(139, 92, 246, 0.08);
+}
+
+.tab-btn.active {
+  background: #8b5cf6;
+  color: #ffffff;
+  box-shadow: 0 4px 12px rgba(139, 92, 246, 0.25);
+}
+
+/* 🟢 MEDICINE FORM STYLING */
+.medicine-section {
+  width: 100%;
+  max-width: 500px;
+}
+
+.medical-card-form {
+  background: var(--bg-right);
+  border: 1px solid var(--border);
+  border-radius: 24px;
+  padding: 35px;
+  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.05);
+}
+
+.medical-card-form h2 {
+  font-size: 24px;
+  font-weight: 700;
+  margin-bottom: 8px;
+  text-align: center;
+}
+
+.card-subtitle {
+  font-size: 14px;
+  color: var(--sub);
+  text-align: center;
+  margin-bottom: 30px;
+  line-height: 1.5;
+}
+
+.medical-form {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.form-group {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  text-align: right;
+}
+
+.form-group label {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--text);
+}
+
+.form-group input[type="text"],
+.form-group input[type="tel"],
+.form-group input[type="date"],
+.form-group input[type="time"],
+.form-group textarea {
+  width: 100%;
+  padding: 12px 16px;
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  background: var(--bg);
+  color: var(--text);
+  font-size: 15px;
+  outline: none;
+  transition: all 0.25s ease;
+  font-family: inherit;
+}
+
+.form-group input:focus,
+.form-group textarea:focus {
+  border-color: #8b5cf6;
+  box-shadow: 0 0 0 3px rgba(139, 92, 246, 0.15);
+}
+
+/* SUBMIT BUTTON */
+.submit-btn {
+  width: 100%;
+  padding: 14px;
+  border: none;
+  border-radius: 12px;
+  font-size: 16px;
+  font-weight: 700;
+  color: #ffffff;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  box-shadow: 0 4px 15px rgba(22, 163, 74, 0.3);
+}
+
+.primary-btn-green {
+  background: linear-gradient(135deg, #16a34a 0%, #15803d 100%);
+}
+
+.submit-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(22, 163, 74, 0.45);
+}
+
+/* 🔵 DOCTOR LIST STYLING */
+.doctors-section {
+  width: 100%;
+  max-width: 1000px;
+}
+
+.doctors-grid-title {
+  text-align: center;
+  margin-bottom: 35px;
+}
+
+.doctors-grid-title h2 {
+  font-size: 26px;
+  font-weight: 700;
+  margin-bottom: 8px;
+}
+
+.doctors-grid-title p {
+  font-size: 14px;
+  color: var(--sub);
+}
+
+/* DOCTOR PHOTO WRAP */
+.doctor-photo-wrap {
+  width: 100%;
+  height: 240px;
+  overflow: hidden;
+  background: var(--bg);
+  border-bottom: 1px solid var(--border);
+}
+
+.doctor-img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: transform 0.5s ease;
+}
+
+.card:hover .doctor-img {
+  transform: scale(1.04);
+}
+
+/* DOCTOR INFO ROWS */
+.doctor-info-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 10px;
+  font-size: 13px;
+  color: var(--sub);
+  text-align: right;
+  direction: rtl;
+}
+
+.info-icon {
+  font-size: 15px;
+}
+
+.info-text strong {
+  color: #22c55e;
+}
+
+/* ⚠️ BOOKING MODAL EXTRA STYLES */
+.booking-modal-box {
+  width: 100%;
+  max-width: 480px;
+  padding: 30px;
+}
+
+.modal-subtitle {
+  font-size: 13px;
+  color: var(--sub);
+  margin-top: -16px;
+  margin-bottom: 24px;
+  text-align: center;
+}
+
+.modal-booking-form {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.align-right {
+  text-align: right;
+}
+
+.form-row {
+  display: flex;
+  gap: 15px;
+}
+
+.flex-1 {
+  flex: 1;
+}
+
+/* ➕ ADD CARD */
+.add-card {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  text-align: center;
+  border: 2px dashed #8b5cf6 !important;
+  background: transparent !important;
+  min-height: 380px;
+  transition: 0.3s;
+}
+
+.add-card:hover {
+  background: rgba(139, 92, 246, 0.08) !important;
+  transform: scale(1.03);
+}
+
+.add-card .plus {
+  font-size: 60px;
+  color: #8b5cf6;
+  margin-bottom: 12px;
+  display: block;
+}
+
+.add-card-body h3 {
+  font-size: 20px;
+  font-weight: 700;
+  color: #8b5cf6;
+}
+
+/* 📱 RESPONSIVE MEDICAL STYLING */
+@media (max-width: 768px) {
+  .medical-header h1 {
+    font-size: 28px;
+  }
+
+  .medical-header p {
+    font-size: 14px;
+  }
+
+  .medical-tabs {
+    width: 100%;
+    overflow-x: auto;
+    white-space: nowrap;
+    justify-content: center;
+  }
+
+  .tab-btn {
+    padding: 10px 18px;
+    font-size: 14px;
+  }
+
+  .medical-card-form {
+    padding: 24px;
+  }
+}
+
+@media (max-width: 480px) {
+  .medical-services-container {
+    padding: 20px 12px;
+  }
+
+  .medical-tabs {
+    gap: 8px;
+    padding: 4px;
+  }
+
+  .tab-btn {
+    padding: 8px 12px;
+    font-size: 13px;
+    flex: 1;
+    text-align: center;
+  }
+
+  .medical-card-form h2 {
+    font-size: 18px;
+  }
+
+  .doctor-photo-wrap {
+    height: 180px;
+  }
+
+  .booking-modal-box {
+    padding: 20px;
+    border-radius: 16px;
+  }
+
+  .form-row {
+    flex-direction: column;
+    gap: 16px;
+  }
+
+  .add-card {
+    min-height: 280px;
+  }
+}

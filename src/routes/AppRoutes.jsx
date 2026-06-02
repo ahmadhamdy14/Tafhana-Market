@@ -14,6 +14,8 @@ import OrderSuccess from "../pages/OrderSuccess/OrderSuccess";
 import AdminOrders from "../pages/AdminOrders/AdminOrders";
 import MyOrders from "../pages/MyOrders/MyOrders";
 import ForgotPassword from "../pages/ForgotPassword/ForgotPassword";
+import Home from "../pages/Home/Home";
+import MedicalServices from "../pages/MedicalServices/MedicalServices";
 
 const AppRoutes = () => {
   return (
@@ -22,7 +24,8 @@ const AppRoutes = () => {
         <Routes>
 
           {/* 🔐 Protected Routes */}
-          <Route path="/" element={<ProtectedRoute> <Products /> </ProtectedRoute>} />
+          <Route path="/" element={<ProtectedRoute> <Home /> </ProtectedRoute>} />
+          <Route path="/medical" element={<ProtectedRoute> <MedicalServices /> </ProtectedRoute>} />
           <Route path="/cart" element={<ProtectedRoute> <Cart /> </ProtectedRoute>} />
           <Route path="/favorites" element={<ProtectedRoute> <Favorites /> </ProtectedRoute>} />
           <Route path="/products" element={<ProtectedRoute> <Products /> </ProtectedRoute>} />

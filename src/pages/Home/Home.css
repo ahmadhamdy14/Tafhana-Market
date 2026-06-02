@@ -1,0 +1,211 @@
+.home-container {
+  padding: 40px 20px;
+  background: var(--bg);
+  min-height: 100vh;
+  color: var(--text);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  font-family: inherit;
+}
+
+/* 🌟 HERO BANNER */
+.home-hero {
+  width: 100%;
+  max-width: 1000px;
+  background: linear-gradient(135deg, rgba(139, 92, 246, 0.15) 0%, rgba(22, 163, 74, 0.08) 100%);
+  border: 1px solid var(--border);
+  border-radius: 24px;
+  padding: 50px 30px;
+  text-align: center;
+  margin-bottom: 50px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.04);
+}
+
+.hero-content h1 {
+  font-size: 38px;
+  font-weight: 800;
+  color: var(--text);
+  margin-bottom: 16px;
+  background: linear-gradient(90deg, #8b5cf6, #16a34a);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+.hero-content p {
+  font-size: 18px;
+  color: var(--sub);
+  max-width: 700px;
+  margin: 0 auto;
+  line-height: 1.6;
+}
+
+/* 🚀 SERVICES SECTION */
+.services-section {
+  width: 100%;
+  max-width: 1000px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.section-title {
+  font-size: 24px;
+  font-weight: 700;
+  margin-bottom: 35px;
+  text-align: center;
+}
+
+.services-grid {
+  width: 100%;
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 30px;
+}
+
+/* 🧊 SERVICE CARD */
+.service-card {
+  background: var(--bg-right);
+  border: 1px solid var(--border);
+  border-radius: 24px;
+  overflow: hidden;
+  text-decoration: none;
+  color: var(--text);
+  transition: transform 0.35s cubic-bezier(0.34, 1.56, 0.64, 1), box-shadow 0.3s ease, border-color 0.3s;
+  display: flex;
+  flex-direction: column;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
+}
+
+.service-card:hover {
+  transform: translateY(-8px) scale(1.01);
+  box-shadow: 0 20px 40px rgba(139, 92, 246, 0.15);
+  border-color: #8b5cf6;
+}
+
+.service-card:nth-child(2):hover {
+  box-shadow: 0 20px 40px rgba(22, 163, 74, 0.15);
+  border-color: #16a34a;
+}
+
+/* IMAGE WRAP */
+.card-image-wrap {
+  width: 100%;
+  height: 220px;
+  overflow: hidden;
+  background: var(--bg);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-bottom: 1px solid var(--border);
+}
+
+.card-image-wrap img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: transform 0.5s ease;
+}
+
+.service-card:hover .card-image-wrap img {
+  transform: scale(1.05);
+}
+
+/* CARD BODY */
+.service-card-body {
+  padding: 24px;
+  display: flex;
+  flex-direction: column;
+  flex-grow: 1;
+}
+
+.service-card-body h3 {
+  font-size: 22px;
+  font-weight: 700;
+  margin-bottom: 12px;
+}
+
+.service-card-body p {
+  font-size: 15px;
+  color: var(--sub);
+  line-height: 1.6;
+  margin-bottom: 24px;
+  flex-grow: 1;
+}
+
+/* CTA BUTTON */
+.cta-btn {
+  display: inline-block;
+  text-align: center;
+  padding: 12px 24px;
+  border-radius: 12px;
+  font-size: 15px;
+  font-weight: 700;
+  color: #ffffff;
+  background: linear-gradient(135deg, #8b5cf6 0%, #7c3aed 100%);
+  box-shadow: 0 4px 12px rgba(139, 92, 246, 0.3);
+  transition: all 0.2s ease;
+}
+
+.cta-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 18px rgba(139, 92, 246, 0.45);
+}
+
+.medical-cta {
+  background: linear-gradient(135deg, #16a34a 0%, #15803d 100%);
+  box-shadow: 0 4px 12px rgba(22, 163, 74, 0.3);
+}
+
+.medical-cta:hover {
+  box-shadow: 0 6px 18px rgba(22, 163, 74, 0.45);
+}
+
+/* 📱 RESPONSIVE MEDIA QUERIES */
+@media (max-width: 768px) {
+  .services-grid {
+    grid-template-columns: 1fr;
+    gap: 25px;
+  }
+
+  .home-hero {
+    padding: 35px 20px;
+    margin-bottom: 35px;
+  }
+
+  .hero-content h1 {
+    font-size: 28px;
+  }
+
+  .hero-content p {
+    font-size: 15px;
+  }
+}
+
+@media (max-width: 480px) {
+  .home-container {
+    padding: 20px 12px;
+  }
+
+  .card-image-wrap {
+    height: 160px;
+  }
+
+  .service-card-body {
+    padding: 16px;
+  }
+
+  .service-card-body h3 {
+    font-size: 18px;
+  }
+
+  .service-card-body p {
+    font-size: 13px;
+    margin-bottom: 16px;
+  }
+
+  .cta-btn {
+    padding: 10px 20px;
+    font-size: 14px;
+  }
+}
