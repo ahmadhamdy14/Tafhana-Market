@@ -21,14 +21,15 @@ export default function InstallButton({
   if (isInstalled) return null;
   // Hide on confirmed-unsupported browsers (iOS Safari, Firefox) after timeout
   if (isSupported === false) return null;
+  // Hide when install prompt is not available (ensures it is hidden after installation or dismissal)
+  if (!canInstall) return null;
 
   return (
     <button
-      className={`install-btn install-btn--${variant}${!canInstall ? " install-btn--pending" : ""}`}
-      onClick={canInstall ? triggerInstall : undefined}
+      className={`install-btn install-btn--${variant}`}
+      onClick={triggerInstall}
       aria-label="تثبيت التطبيق"
-      title={canInstall ? "تثبيت التطبيق" : "جاري تحضير التثبيت…"}
-      disabled={!canInstall}
+      title="تثبيت التطبيق"
     >
       <svg
         className="install-btn__icon"
