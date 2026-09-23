@@ -17,12 +17,14 @@ const Cart = () => {
 
   const [showForm, setShowForm] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [copied, setCopied] = useState(false);
   const [form, setForm] = useState({
     firstName: userData?.firstName || "",
     lastName: userData?.lastName || "",
     email: user?.email || "",
     phone: userData?.phone || "",
     address: "",
+    paymentMethod: "cash", // default
   });
 
   // Subtotal after discount
@@ -38,12 +40,20 @@ const Cart = () => {
     setForm((prev) => ({ ...prev, [e.target.name]: e.target.value }));
   };
 
-  const buildWhatsAppMessage = (orderId, items) => {
+  const PAYMENT_OPTIONS = [
+    { value: "cash", label: "عند التوصيل", icon: "💵" },
+    { value: "instapay", label: "انستا باي", icon: "📲" },
+    { value: "vodafone", label: "فودافون كاش", icon: "🔴" },
+  ];
+
+  const buildWhatsAppMessage = (items) => {
+    const payLabel = PAYMENT_OPTIONS.find(p => p.value === form.paymentMethod)?.label || form.paymentMethod;
     let msg = `🛒 *طلب جديد* 🎉\n`;
     msg += `━━━━━━━━━━━━━━━\n`;
     msg += `👤 الاسم: ${form.firstName} ${form.lastName}\n`;
     msg += `📞 الهاتف: ${form.phone}\n`;
     msg += `📍 العنوان: ${form.address}\n`;
+    msg += `💳 طريقة الدفع: ${payLabel}\n`;
     msg += `━━━━━━━━━━━━━━━\n`;
     msg += `📦 *المنتجات:*\n`;
 
@@ -84,10 +94,11 @@ const Cart = () => {
         },
         items,
         totalPrice: parseFloat(total.toFixed(2)),
+        paymentMethod: form.paymentMethod,
       });
 
       // ✅ Open WhatsApp with full order details
-      const waUrl = `https://wa.me/${WHATSAPP_NUMBER}?text=${buildWhatsAppMessage(orderId, items)}`;
+      const waUrl = `https://wa.me/${WHATSAPP_NUMBER}?text=${buildWhatsAppMessage(items)}`;
       window.open(waUrl, "_blank");
 
       clearCart();
@@ -177,6 +188,52 @@ const Cart = () => {
               </button>
             ) : (
               <form className="checkout-form" onSubmit={handlePlaceOrder}>
+                <h3>طريقة الدفع 💳</h3>
+                <div className="payment-options">
+                  {PAYMENT_OPTIONS.map((opt) => (
+                    <label
+                      key={opt.value}
+                      className={`payment-option ${form.paymentMethod === opt.value ? "selected" : ""}`}
+                    >
+                      <input
+                        type="radio"
+                        name="paymentMethod"
+                        value={opt.value}
+                        checked={form.paymentMethod === opt.value}
+                        onChange={handleChange}
+                      />
+                      <span className="pay-icon">{opt.icon}</span>
+                      <span className="pay-label">{opt.label}</span>
+                    </label>
+                  ))}
+                </div>
+
+                {/* 💳 Transfer number for InstaPay / Vodafone Cash */}
+                {(form.paymentMethod === "instapay" || form.paymentMethod === "vodafone") && (
+                  <div className="transfer-info">
+                    <span className="transfer-label">
+                      {form.paymentMethod === "instapay" ? "📲 رقم انستا باي" : "🔴 رقم فودافون كاش"}
+                    </span>
+                    <div className="transfer-number-row">
+                      <span className="transfer-number">01069199985</span>
+                      <button
+                        type="button"
+                        className="copy-btn"
+                        onClick={() => {
+                          navigator.clipboard.writeText("01069199985");
+                          setCopied(true);
+                          setTimeout(() => setCopied(false), 2000);
+                        }}
+                      >
+                        {copied ? "✔ تم النسخ" : "📋 نسخ"}
+                      </button>
+                    </div>
+                    <p className="transfer-note">
+                      برجاء تحويل المبلغ على هذا الرقم وإرسال صورة التحويل مع الطلب عبر واتساب
+                    </p>
+                  </div>
+                )}
+
                 <h3>معلومات التوصيل</h3>
 
                 <div className="form-row">

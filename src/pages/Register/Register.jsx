@@ -15,7 +15,7 @@ import { ThemeContext } from "../../context/ThemeContext";
 // 🔥 Firebase
 import { auth, db } from "../../firebase";
 import { createUserWithEmailAndPassword } from "firebase/auth";
-import { doc, setDoc } from "firebase/firestore";
+import { doc, setDoc, collection, query, where, getDocs } from "firebase/firestore";
 import { toast } from "react-toastify";
 
 
@@ -117,6 +117,19 @@ const Register = () => {
 
     try {
       setLoading(true);
+
+      // 📞 Check if phone number already exists in Firestore
+      const phoneQuery = query(
+        collection(db, "users"),
+        where("phone", "==", form.phone)
+      );
+      const phoneSnapshot = await getDocs(phoneQuery);
+      if (!phoneSnapshot.empty) {
+        toast.error("رقم الهاتف مسجل بالفعل .");
+        setErrors((prev) => ({ ...prev, phone: "رقم الهاتف مسجل بالفعل ." }));
+        setLoading(false);
+        return;
+      }
 
       // 🔐 Create Auth user
       const userCredential = await createUserWithEmailAndPassword(

@@ -116,8 +116,6 @@ export function PWAProvider({ children }) {
       deferredPrompt.prompt();
       const { outcome } = await deferredPrompt.userChoice;
 
-      console.log(`[PWA] Install prompt choice: ${outcome}`);
-
       if (outcome === "accepted") {
         localStorage.setItem(KEY_INSTALLED, "1");
         setIsInstalled(true);

@@ -11,10 +11,17 @@ import {
   deleteDoc,
   doc,
 } from "firebase/firestore";
+import { Link } from "react-router-dom";
 import "./MedicalServices.css";
 
 // 📱 WhatsApp pharmacy/business number
 const WHATSAPP_NUMBER = "201069199985";
+
+const PAYMENT_OPTIONS = [
+  { value: "cash", label: "عند التوصيل", icon: "💵" },
+  { value: "instapay", label: "انستا باي", icon: "📲" },
+  { value: "vodafone", label: "فودافون كاش", icon: "🔴" },
+];
 
 // Default seed doctors in case database collection is empty
 const DEFAULT_DOCTORS = [
@@ -44,6 +51,7 @@ const DEFAULT_DOCTORS = [
 export default function MedicalServices() {
   const { user, userData } = useContext(AuthContext);
   const [activeTab, setActiveTab] = useState("medicine"); // "medicine" | "doctors"
+  const [copied, setCopied] = useState(false);
 
   const [doctors, setDoctors] = useState([]);
   const [loadingDoctors, setLoadingDoctors] = useState(true);
@@ -62,6 +70,7 @@ export default function MedicalServices() {
     patientName: "",
     phone: "",
     address: "",
+    paymentMethod: "cash",
   });
 
   /* ── Admin Doctor CRUD State ── */
@@ -182,7 +191,7 @@ export default function MedicalServices() {
   const closeBookingModal = () => {
     setSelectedDoctor(null);
     setShowBookingModal(false);
-    setBookingForm({ patientName: "", phone: "", address: "" });
+    setBookingForm({ patientName: "", phone: "", address: "", paymentMethod: "cash" });
   };
 
   const handleBookingSubmit = async (e) => {
@@ -192,8 +201,11 @@ export default function MedicalServices() {
       return;
     }
 
-    const { patientName, phone, address } = bookingForm;
+    const { patientName, phone, address, paymentMethod = "cash" } = bookingForm;
     const feeNum = parseInt(selectedDoctor.fee) || 0;
+    const SERVICE_FEE = 10;
+    const totalPrice = feeNum + SERVICE_FEE;
+    const payLabel = PAYMENT_OPTIONS.find((p) => p.value === paymentMethod)?.label || paymentMethod;
 
     try {
       // 1. Save in Firestore orders collection exactly like a normal product order
@@ -218,7 +230,8 @@ export default function MedicalServices() {
           address: address,
         },
         items,
-        totalPrice: feeNum,
+        totalPrice: totalPrice,
+        paymentMethod: paymentMethod,
       });
 
       // 2. Format WhatsApp redirect message
@@ -230,7 +243,10 @@ export default function MedicalServices() {
       message += `📍 العنوان: ${address}\n`;
       message += `👨‍⚕️ الطبيب: ${selectedDoctor.name}\n`;
       message += `🏷️ التخصص: ${selectedDoctor.specialty}\n`;
-      message += `💵 سعر الكشف: ${selectedDoctor.fee}\n`;
+      message += `💵 قيمة الكشف: ${selectedDoctor.fee}\n`;
+      message += `🛎️ رسوم الخدمة: 10 EGP\n`;
+      message += `💰 المجموع الإجمالي: ${totalPrice} EGP\n`;
+      message += `💳 طريقة الدفع: ${payLabel}\n`;
       message += `━━━━━━━━━━━━━━━\n`;
       message += `برجاء تأكيد الحجز وإرسال المواعيد المتاحة الكشف.`;
 
@@ -322,6 +338,7 @@ export default function MedicalServices() {
       <div className="medical-header">
         <h1>الخدمات الطبية والرعاية الصحية</h1>
         <p>اطلب أدويتك الطبية أو احجز موعد كشف مباشر مع أفضل الأطباء المتخصصين</p>
+        <Link to="/products" className="go-to-medical-btn">الذهاب إلى المتجر 🛒</Link>
       </div>
 
       {/* Tabs Switcher */}
@@ -338,6 +355,7 @@ export default function MedicalServices() {
         >
           🩺 حجز موعد طبيب
         </button>
+
       </div>
 
       {/* 🟢 TAB CONTENT: SIMPLIFIED MEDICINE FORM */}
@@ -414,7 +432,7 @@ export default function MedicalServices() {
                   <div className="card-body">
                     <span className="category-badge">{doctor.specialty}</span>
                     <h3 style={{ margin: "5px 0" }}>{doctor.name}</h3>
-                    
+
                     {/* Doctor Info Details */}
                     <div className="doctor-info-row">
                       <span className="info-icon">🕒</span>
@@ -506,6 +524,70 @@ export default function MedicalServices() {
                   onChange={handleBookingChange}
                   required
                 />
+              </div>
+
+              <div className="form-group align-right">
+                <label>طريقة الدفع 💳</label>
+                <div className="payment-options">
+                  {PAYMENT_OPTIONS.map((opt) => (
+                    <label
+                      key={opt.value}
+                      className={`payment-option ${bookingForm.paymentMethod === opt.value ? "selected" : ""}`}
+                    >
+                      <input
+                        type="radio"
+                        name="paymentMethod"
+                        value={opt.value}
+                        checked={bookingForm.paymentMethod === opt.value}
+                        onChange={handleBookingChange}
+                      />
+                      <span className="pay-icon">{opt.icon}</span>
+                      <span className="pay-label">{opt.label}</span>
+                    </label>
+                  ))}
+                </div>
+              </div>
+
+              {/* 💳 Transfer number for InstaPay / Vodafone Cash */}
+              {(bookingForm.paymentMethod === "instapay" || bookingForm.paymentMethod === "vodafone") && (
+                <div className="transfer-info">
+                  <span className="transfer-label">
+                    {bookingForm.paymentMethod === "instapay" ? "📲 رقم انستا باي" : "🔴 رقم فودافون كاش"}
+                  </span>
+                  <div className="transfer-number-row">
+                    <span className="transfer-number">01069199985</span>
+                    <button
+                      type="button"
+                      className="copy-btn"
+                      onClick={() => {
+                        navigator.clipboard.writeText("01069199985");
+                        setCopied(true);
+                        setTimeout(() => setCopied(false), 2000);
+                      }}
+                    >
+                      {copied ? "✔ تم النسخ" : "📋 نسخ"}
+                    </button>
+                  </div>
+                  <p className="transfer-note">
+                    برجاء تحويل المبلغ على هذا الرقم وإرسال صورة التحويل مع الحجز عبر واتساب
+                  </p>
+                </div>
+              )}
+
+              {/* 💰 Price & Service Fee Breakdown */}
+              <div className="booking-summary-box">
+                <div className="summary-row">
+                  <span>قيمة الكشف:</span>
+                  <span>{selectedDoctor.fee}</span>
+                </div>
+                <div className="summary-row">
+                  <span>رسوم الخدمة 🛎️:</span>
+                  <span>10 EGP</span>
+                </div>
+                <div className="summary-row total-row">
+                  <span>المجموع الإجمالي:</span>
+                  <span>{(parseInt(selectedDoctor.fee) || 0) + 10} EGP</span>
+                </div>
               </div>
 
               <div className="modal-actions" style={{ marginTop: "20px" }}>

@@ -4,6 +4,7 @@ import { db } from "../../firebase";
 import { doc, getDoc, updateDoc } from "firebase/firestore";
 import { useNavigate, useParams } from "react-router-dom";
 import { toast } from "react-toastify";
+import { generateKeywords } from "../../services/productService";
 
 const EditProduct = () => {
   const { id } = useParams();
@@ -42,7 +43,7 @@ const EditProduct = () => {
           navigate("/products");
         }
       } catch (error) {
-        console.log(error);
+        console.error(error);
         toast.error("Error fetching product");
       } finally {
         setFetching(false);
@@ -78,12 +79,13 @@ const EditProduct = () => {
         image: form.image,
         category: form.category ? form.category.trim() : "متنوعة",
         discount: Number(form.discount) || 0,
+        searchKeywords: generateKeywords(form.name, form.description),
       });
 
       toast.success("تم تحديث المنتج بنجاح 🎉");
       navigate("/products");
     } catch (error) {
-      console.log(error);
+      console.error(error);
       toast.error("حدث خطأ في تحديث المنتج");
     } finally {
       setLoading(false);

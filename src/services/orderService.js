@@ -20,12 +20,13 @@ const ORDERS_COLLECTION = "orders";
  * Create a new order in Firestore.
  * Returns the new document ID.
  */
-export const createOrder = async ({ userId, customer, items, totalPrice }) => {
+export const createOrder = async ({ userId, customer, items, totalPrice, paymentMethod }) => {
   const docRef = await addDoc(collection(db, ORDERS_COLLECTION), {
     userId,
     customer,
     items,
     totalPrice,
+    paymentMethod: paymentMethod || "cash",
     status: "pending",
     createdAt: serverTimestamp(),
   });
@@ -128,3 +129,25 @@ export const listenToPendingOrdersCount = (callback) => {
   });
 };
 
+/**
+ * Permanently delete an order from Firestore.
+ */
+export const deleteOrder = async (orderId) => {
+  await deleteDoc(doc(db, ORDERS_COLLECTION, orderId));
+};
+
+/**
+ * Real-time listener for ALL orders (admin use), sorted newest first.
+ * Returns an unsubscribe function.
+ * callback(orders) is called immediately and on every change.
+ */
+export const listenToAllOrders = (callback) => {
+  const q = query(
+    collection(db, ORDERS_COLLECTION),
+    orderBy("createdAt", "desc")
+  );
+  return onSnapshot(q, (snapshot) => {
+    const orders = snapshot.docs.map((d) => ({ id: d.id, ...d.data() }));
+    callback(orders);
+  });
+};

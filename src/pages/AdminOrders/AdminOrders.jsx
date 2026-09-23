@@ -1,18 +1,25 @@
 import { useEffect, useState } from "react";
-import { getAllOrders, updateOrderStatus } from "../../services/orderService";
+import { listenToAllOrders, updateOrderStatus, deleteOrder } from "../../services/orderService";
 import { toast } from "react-toastify";
 import "./AdminOrders.css";
 
 const STATUSES = [
-  { value: "pending",    label: "حجز",          color: "#f59e0b", bg: "rgba(245,158,11,0.12)",  border: "rgba(245,158,11,0.3)"  },
-  { value: "processing", label: "قيد التجهيز",  color: "#3b82f6", bg: "rgba(59,130,246,0.12)",  border: "rgba(59,130,246,0.3)"  },
-  { value: "shipped",    label: "جاري التوصيل", color: "#8b5cf6", bg: "rgba(139,92,246,0.12)",  border: "rgba(139,92,246,0.3)"  },
-  { value: "delivered",  label: "تم التوصيل",   color: "#22c55e", bg: "rgba(34,197,94,0.12)",   border: "rgba(34,197,94,0.3)"   },
-  { value: "cancelled",  label: "ألغاء",        color: "#ef4444", bg: "rgba(239,68,68,0.12)",   border: "rgba(239,68,68,0.3)"   },
+  { value: "pending", label: "حجز", color: "#f59e0b", bg: "rgba(245,158,11,0.12)", border: "rgba(245,158,11,0.3)" },
+  { value: "processing", label: "قيد التجهيز", color: "#3b82f6", bg: "rgba(59,130,246,0.12)", border: "rgba(59,130,246,0.3)" },
+  { value: "shipped", label: "جاري التوصيل", color: "#8b5cf6", bg: "rgba(139,92,246,0.12)", border: "rgba(139,92,246,0.3)" },
+  { value: "delivered", label: "تم التوصيل", color: "#22c55e", bg: "rgba(34,197,94,0.12)", border: "rgba(34,197,94,0.3)" },
+  { value: "cancelled", label: "ألغاء", color: "#ef4444", bg: "rgba(239,68,68,0.12)", border: "rgba(239,68,68,0.3)" },
 ];
 
 const getStatusInfo = (statusValue) =>
   STATUSES.find((s) => s.value === statusValue) || STATUSES[0];
+
+const PAYMENT_LABELS = {
+  cash: { label: "عند التوصيل", icon: "💵", color: "#22c55e" },
+  instapay: { label: "انستا باي", icon: "📲", color: "#3b82f6" },
+  vodafone: { label: "فودافون كاش", icon: "🔴", color: "#ef4444" },
+};
+const getPaymentInfo = (method) => PAYMENT_LABELS[method] || { label: method || "—", icon: "💳", color: "#888" };
 
 const formatDate = (ts) => {
   if (!ts) return "—";
@@ -25,24 +32,45 @@ const formatDate = (ts) => {
 };
 
 const AdminOrders = () => {
-  const [orders, setOrders]         = useState([]);
-  const [loading, setLoading]       = useState(true);
+  const [orders, setOrders] = useState([]);
+  const [loading, setLoading] = useState(true);
   const [updatingId, setUpdatingId] = useState(null);
-  const [selected, setSelected]     = useState(null); // order shown in modal
+  const [selected, setSelected] = useState(null); // order shown in modal
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
+  const [deletingOrderId, setDeletingOrderId] = useState(null);
+
+  const handleDeleteClick = (orderId) => {
+    setDeletingOrderId(orderId);
+    setShowDeleteModal(true);
+  };
+
+  const confirmDeleteOrder = async () => {
+    try {
+      await deleteOrder(deletingOrderId);
+      setOrders((prev) => prev.filter((o) => o.id !== deletingOrderId));
+      toast.success("تم حذف الطلب بنجاح");
+      setShowDeleteModal(false);
+      setDeletingOrderId(null);
+      setSelected(null);
+    } catch (err) {
+      console.error(err);
+      toast.error("فشل حذف الطلب");
+    }
+  };
+
+  const cancelDeleteOrder = () => {
+    setShowDeleteModal(false);
+    setDeletingOrderId(null);
+  };
 
   useEffect(() => {
-    const fetchOrders = async () => {
-      try {
-        const data = await getAllOrders();
-        setOrders(data);
-      } catch (err) {
-        console.error(err);
-        toast.error("فشل تحميل الطلبات");
-      } finally {
-        setLoading(false);
-      }
-    };
-    fetchOrders();
+    // 📡 Real-time listener — keeps the orders table always up to date
+    const unsubscribe = listenToAllOrders((data) => {
+      setOrders(data);
+      setLoading(false);
+    });
+
+    return () => unsubscribe();
   }, []);
 
   const handleStatusChange = async (orderId, newStatus) => {
@@ -78,12 +106,12 @@ const AdminOrders = () => {
             <thead>
               <tr>
                 <th>#</th>
-                <th>رقم الطلب</th>
                 <th>العميل</th>
                 <th>رقم الهاتف</th>
                 <th>📍 العنوان</th>
                 <th>المنتجات</th>
                 <th>المجموع</th>
+                <th>طريقة الدفع</th>
                 <th>التاريخ</th>
                 <th>حالة الطلب</th>
                 <th>تفاصيل</th>
@@ -95,7 +123,6 @@ const AdminOrders = () => {
                 return (
                   <tr key={order.id}>
                     <td>{index + 1}</td>
-                    <td className="order-id-cell">#{order.id.slice(0, 8).toUpperCase()}</td>
                     <td>
                       {order.customer?.firstName} {order.customer?.lastName}
                       <br />
@@ -105,6 +132,16 @@ const AdminOrders = () => {
                     <td className="order-address">{order.customer?.address || "—"}</td>
                     <td className="items-count">{order.items?.length} منتج</td>
                     <td className="order-total">{order.totalPrice?.toFixed(0)} EGP</td>
+                    <td>
+                      {(() => {
+                        const pi = getPaymentInfo(order.paymentMethod);
+                        return (
+                          <span style={{ color: pi.color, fontWeight: 600, whiteSpace: "nowrap" }}>
+                            {pi.icon} {pi.label}
+                          </span>
+                        );
+                      })()}
+                    </td>
                     <td>{formatDate(order.createdAt)}</td>
                     <td>
                       <select
@@ -126,12 +163,20 @@ const AdminOrders = () => {
                       </select>
                     </td>
                     <td>
-                      <button
-                        className="details-btn"
-                        onClick={() => setSelected(order)}
-                      >
-                        👁 عرض
-                      </button>
+                      <div className="actions-cell">
+                        <button
+                          className="details-btn"
+                          onClick={() => setSelected(order)}
+                        >
+                          👁 عرض
+                        </button>
+                        {/*<button
+                          className="delete-btn"
+                          onClick={() => handleDeleteClick(order.id)}
+                        >
+                          حذف 🗑️
+                        </button>*/}
+                      </div>
                     </td>
                   </tr>
                 );
@@ -189,6 +234,12 @@ const AdminOrders = () => {
                   <span className="info-label">📍 العنوان</span>
                   <span className="info-value">{selected.customer?.address || "—"}</span>
                 </div>
+                <div className="modal-info-item">
+                  <span className="info-label">💳 طريقة الدفع</span>
+                  <span className="info-value" style={{ color: getPaymentInfo(selected.paymentMethod).color, fontWeight: 700 }}>
+                    {getPaymentInfo(selected.paymentMethod).icon} {getPaymentInfo(selected.paymentMethod).label}
+                  </span>
+                </div>
               </div>
             </div>
 
@@ -242,6 +293,42 @@ const AdminOrders = () => {
               </select>
             </div>
 
+            <div style={{ marginTop: "24px", paddingTop: "16px", borderTop: "1px solid var(--border)" }}>
+              <button
+                className="delete-btn modal-delete-btn"
+                onClick={() => handleDeleteClick(selected.id)}
+              >
+                🗑️ حذف الطلب نهائياً
+              </button>
+            </div>
+
+          </div>
+        </div>
+      )}
+      {/* ⚠️ Delete Confirmation Modal */}
+      {showDeleteModal && (
+        <div className="modal-overlay" onClick={cancelDeleteOrder}>
+          <div className="modal-box" onClick={(e) => e.stopPropagation()}>
+            <h3>هل أنت متأكد من حذف هذا الطلب نهائياً؟</h3>
+            <p style={{ color: "var(--sub)", fontSize: "14px", margin: "10px 0 20px" }}>
+              لا يمكن التراجع عن هذا الإجراء وسيتم حذفه من قاعدة البيانات.
+            </p>
+
+            <div className="modal-actions">
+              <button
+                className="yes-btn"
+                onClick={confirmDeleteOrder}
+              >
+                نعم، احذف
+              </button>
+
+              <button
+                className="no-btn"
+                onClick={cancelDeleteOrder}
+              >
+                لا
+              </button>
+            </div>
           </div>
         </div>
       )}

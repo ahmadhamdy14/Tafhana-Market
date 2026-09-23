@@ -15,7 +15,7 @@ export default function Home() {
       {/* 🚀 Main Navigation Cards Section */}
       <section className="services-section">
         <h2 className="section-title">اختر الخدمة المطلوبة للبدء</h2>
-        
+
         <div className="services-grid">
           {/* Card 1: Browse Products */}
           <Link to="/products" className="service-card">
@@ -25,7 +25,7 @@ export default function Home() {
             <div className="service-card-body">
               <h3>تصفح المنتجات</h3>
               <p>استكشف جميع الأغذية، المنظفات، والسلع الاستهلاكية المتاحة واطلبها مباشرة لتصلك حتى باب البيت.</p>
-              <span className="cta-btn">تصفح الآن 🛒</span>
+              <span className="cta-btn">الذهاب إلى المتجر 🛒</span>
             </div>
           </Link>
 

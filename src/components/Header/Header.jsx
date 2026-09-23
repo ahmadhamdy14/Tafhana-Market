@@ -111,7 +111,7 @@ const Header = () => {
                 </>
               )}
               <span className="user-name">
-                👋 Hi {userData?.firstName || "User"}
+                👋 اهلا  {userData?.firstName || "User"}
               </span>
 
               <button onClick={handleLogout} className="theme-btn">

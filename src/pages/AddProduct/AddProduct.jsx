@@ -4,6 +4,7 @@ import { db } from "../../firebase";
 import { collection, addDoc } from "firebase/firestore";
 import { useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
+import { generateKeywords } from "../../services/productService";
 
 const AddProduct = () => {
   const navigate = useNavigate();
@@ -44,13 +45,14 @@ const AddProduct = () => {
         image: form.image,
         category: form.category ? form.category.trim() : "متنوع",
         discount: Number(form.discount) || 0,
+        searchKeywords: generateKeywords(form.name, form.description),
         createdAt: new Date(),
       });
 
       toast.success("تمت إضافة المنتج بنجاح");
       navigate("/");
     } catch (error) {
-      console.log(error);
+      console.error(error);
       toast.error("حدث خطأ أثناء إضافة المنتج");
     } finally {
       setLoading(false);
