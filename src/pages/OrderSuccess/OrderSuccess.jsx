@@ -91,6 +91,12 @@ const OrderSuccess = () => {
             <span className="meta-label">التاريخ</span>
             <span className="meta-value">{formatDate(order.createdAt)}</span>
           </div>
+          {order.customer?.shopName && (
+            <div className="meta-item">
+              <span className="meta-label">اسم المحل</span>
+              <span className="meta-value">{order.customer.shopName}</span>
+            </div>
+          )}
           <div className="meta-item">
             <span className="meta-label">العنوان</span>
             <span className="meta-value">{order.customer?.address || "—"}</span>

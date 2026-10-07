@@ -23,7 +23,9 @@ const Cart = () => {
     lastName: userData?.lastName || "",
     email: user?.email || "",
     phone: userData?.phone || "",
+    shopName: "",
     address: "",
+    notes: "",
     paymentMethod: "cash", // default
   });
 
@@ -52,7 +54,13 @@ const Cart = () => {
     msg += `━━━━━━━━━━━━━━━\n`;
     msg += `👤 الاسم: ${form.firstName} ${form.lastName}\n`;
     msg += `📞 الهاتف: ${form.phone}\n`;
+    if (form.shopName && form.shopName.trim()) {
+      msg += `🏪 اسم المحل: ${form.shopName.trim()}\n`;
+    }
     msg += `📍 العنوان: ${form.address}\n`;
+    if (form.notes && form.notes.trim()) {
+      msg += `📝 ملاحظات: ${form.notes.trim()}\n`;
+    }
     msg += `💳 طريقة الدفع: ${payLabel}\n`;
     msg += `━━━━━━━━━━━━━━━\n`;
     msg += `📦 *المنتجات:*\n`;
@@ -90,11 +98,14 @@ const Cart = () => {
           lastName: form.lastName,
           email: form.email,
           phone: form.phone,
+          shopName: form.shopName ? form.shopName.trim() : "",
           address: form.address,
+          notes: form.notes ? form.notes.trim() : "",
         },
         items,
         totalPrice: parseFloat(total.toFixed(2)),
         paymentMethod: form.paymentMethod,
+        notes: form.notes ? form.notes.trim() : "",
       });
 
       // ✅ Open WhatsApp with full order details
@@ -275,11 +286,29 @@ const Cart = () => {
 
                 <input
                   type="text"
+                  name="shopName"
+                  placeholder="اسم المحل (اختياري) 🏪"
+                  value={form.shopName}
+                  onChange={handleChange}
+                />
+                <p style={{ color: "red", fontSize: "16px" }}>
+                  ملحوظة : في حاله اختيار محل معين قد يؤثر على سعر المنتج
+                </p>
+                <input
+                  type="text"
                   name="address"
                   placeholder="العنوان بالتفصيل 📍"
                   value={form.address}
                   onChange={handleChange}
                   required
+                />
+
+                <textarea
+                  name="notes"
+                  placeholder="ملاحظات على الطلب (اختياري) 📝"
+                  value={form.notes}
+                  onChange={handleChange}
+                  rows="2"
                 />
 
                 <button

@@ -2,14 +2,21 @@ import "./Login.css";
 import hero from "../../assets/1.jpeg";
 import hero2 from "../../assets/2.jpeg";
 import { FaPhone, FaLock, FaEye, FaEyeSlash } from "react-icons/fa";
+import { FcGoogle } from "react-icons/fc";
 import { useState, useContext } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
 import { ThemeContext } from "../../context/ThemeContext";
 
 // 🔥 Firebase
-import { auth, db } from "../../firebase";
-import { signInWithEmailAndPassword, signOut } from "firebase/auth";
+import { auth, db, googleProvider } from "../../firebase";
+import {
+  signInWithEmailAndPassword,
+  signInWithPopup,
+  signOut,
+  GoogleAuthProvider,
+  linkWithCredential,
+} from "firebase/auth";
 import {
   collection,
   query,
@@ -17,6 +24,7 @@ import {
   getDocs,
   doc,
   getDoc,
+  setDoc,
 } from "firebase/firestore";
 
 const Login = () => {
@@ -98,6 +106,92 @@ const Login = () => {
     }
   };
 
+  const handleGoogleLogin = async () => {
+    setLoading(true);
+    setError("");
+
+    try {
+      const result = await signInWithPopup(auth, googleProvider);
+      const user = result.user;
+
+      // 🔒 Step 1: Check if user document already exists in Firestore for this UID
+      const userRef = doc(db, "users", user.uid);
+      const userSnap = await getDoc(userRef);
+
+      // 📝 Step 2: If first time logging in, check existing docs by email or create new
+      if (!userSnap.exists()) {
+        const usersRef = collection(db, "users");
+        const q = query(usersRef, where("email", "==", user.email));
+        const existingDocs = await getDocs(q);
+
+        if (!existingDocs.empty) {
+          const existingData = existingDocs.docs[0].data();
+          await setDoc(userRef, {
+            ...existingData,
+            uid: user.uid,
+            photoURL: user.photoURL || existingData.photoURL || "",
+          });
+        } else {
+          const nameParts = (user.displayName || "").trim().split(" ");
+          const firstName = nameParts[0] || user.email?.split("@")[0] || "مستخدم";
+          const lastName = nameParts.slice(1).join(" ") || "";
+
+          await setDoc(userRef, {
+            firstName,
+            lastName,
+            email: user.email || "",
+            phone: user.phoneNumber || "",
+            gender: "",
+            uid: user.uid,
+            role: "user",
+            photoURL: user.photoURL || "",
+            createdAt: new Date(),
+          });
+        }
+      }
+
+      toast.success("تم تسجيل الدخول بنجاح 🎉");
+      navigate("/");
+    } catch (err) {
+      if (err.code === "auth/account-exists-with-different-credential") {
+        // 🔑 Account exists with password. Link Google provider to existing account without removing password.
+        const pendingCred = GoogleAuthProvider.credentialFromError(err);
+        const email = err.customData?.email || err.email;
+
+        let passwordToUse = form.password;
+
+        if (!passwordToUse || form.identifier.trim() !== email) {
+          passwordToUse = window.prompt(
+            `البريد الإلكتروني (${email}) مسجل بالفعل بكلمة مرور.\nيرجى إدخال كلمة المرور لربط حساب Google دون إزالة كلمة المرور:`
+          );
+        }
+
+        if (passwordToUse) {
+          try {
+            const userCred = await signInWithEmailAndPassword(auth, email, passwordToUse);
+            await linkWithCredential(userCred.user, pendingCred);
+            toast.success("تم ربط حساب Google وتسجيل الدخول بنجاح 🎉");
+            navigate("/");
+            return;
+          } catch (linkErr) {
+            toast.error("كلمة المرور غير صحيحة. لم يتم ربط الحساب.");
+          }
+        } else {
+          toast.info("تم إلغاء عملية الربط.");
+        }
+      } else if (err.code === "auth/popup-closed-by-user") {
+        toast.info("تم إغلاق نافذة تسجيل الدخول");
+      } else if (err.code === "auth/cancelled-popup-request") {
+        // popup request cancelled
+      } else {
+        toast.error("فشل تسجيل الدخول بواسطة Google");
+        setError(err.message);
+      }
+    } finally {
+      setLoading(false);
+    }
+  };
+
   return (
     <div className="login-container">
       <div
@@ -159,9 +253,19 @@ const Login = () => {
           </Link>
         </div>
 
-        <button className="login-btn" onClick={handleLogin}>
+        <button className="login-btn" onClick={handleLogin} disabled={loading}>
           {loading ? "جاري التحميل..." : "تسجيل الدخول"}
         </button>
+
+        <div className="divider">
+          <span>أو</span>
+        </div>
+
+        <button className="google-btn" onClick={handleGoogleLogin} disabled={loading}>
+          <FcGoogle className="google-icon" />
+          <span>المتابعة باستخدام Google</span>
+        </button>
+
         <p className="sub-text" style={{ textAlign: "center" }}>
           ليس لديك حسابا؟ <Link to="/register" className="link">اضغط هنا</Link>
         </p>

@@ -9,16 +9,21 @@ import {
   FaEye,
   FaEyeSlash,
 } from "react-icons/fa";
+import { FcGoogle } from "react-icons/fc";
 import { useState, useContext } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { ThemeContext } from "../../context/ThemeContext";
 // 🔥 Firebase
-import { auth, db } from "../../firebase";
-import { createUserWithEmailAndPassword } from "firebase/auth";
-import { doc, setDoc, collection, query, where, getDocs } from "firebase/firestore";
+import { auth, db, googleProvider } from "../../firebase";
+import {
+  createUserWithEmailAndPassword,
+  signInWithPopup,
+  signInWithEmailAndPassword,
+  GoogleAuthProvider,
+  linkWithCredential,
+} from "firebase/auth";
+import { doc, setDoc, getDoc, collection, query, where, getDocs } from "firebase/firestore";
 import { toast } from "react-toastify";
-
-
 
 const Register = () => {
   const navigate = useNavigate();
@@ -169,6 +174,89 @@ const Register = () => {
     }
   };
 
+  const handleGoogleRegister = async () => {
+    setLoading(true);
+    setErrors({});
+
+    try {
+      const result = await signInWithPopup(auth, googleProvider);
+      const user = result.user;
+
+      const userRef = doc(db, "users", user.uid);
+      const userSnap = await getDoc(userRef);
+
+      if (!userSnap.exists()) {
+        const usersRef = collection(db, "users");
+        const q = query(usersRef, where("email", "==", user.email));
+        const existingDocs = await getDocs(q);
+
+        if (!existingDocs.empty) {
+          const existingData = existingDocs.docs[0].data();
+          await setDoc(userRef, {
+            ...existingData,
+            uid: user.uid,
+            photoURL: user.photoURL || existingData.photoURL || "",
+          });
+        } else {
+          const nameParts = (user.displayName || "").trim().split(" ");
+          const firstName = nameParts[0] || user.email?.split("@")[0] || "مستخدم";
+          const lastName = nameParts.slice(1).join(" ") || "";
+
+          await setDoc(userRef, {
+            firstName,
+            lastName,
+            email: user.email || "",
+            phone: user.phoneNumber || "",
+            gender: "",
+            uid: user.uid,
+            role: "user",
+            photoURL: user.photoURL || "",
+            createdAt: new Date(),
+          });
+        }
+      }
+
+      toast.success("تم تسجيل الدخول بنجاح 🎉");
+      navigate("/products");
+    } catch (err) {
+      if (err.code === "auth/account-exists-with-different-credential") {
+        // 🔑 Account exists with password. Link Google provider to existing account without removing password.
+        const pendingCred = GoogleAuthProvider.credentialFromError(err);
+        const email = err.customData?.email || err.email;
+
+        let passwordToUse = form.password;
+        if (!passwordToUse || form.email.trim() !== email) {
+          passwordToUse = window.prompt(
+            `البريد الإلكتروني (${email}) مسجل بالفعل بكلمة مرور.\nيرجى إدخال كلمة المرور لربط حساب Google دون إزالة كلمة المرور:`
+          );
+        }
+
+        if (passwordToUse) {
+          try {
+            const userCred = await signInWithEmailAndPassword(auth, email, passwordToUse);
+            await linkWithCredential(userCred.user, pendingCred);
+            toast.success("تم ربط حساب Google وتسجيل الدخول بنجاح 🎉");
+            navigate("/products");
+            return;
+          } catch (linkErr) {
+            toast.error("كلمة المرور غير صحيحة. لم يتم ربط الحساب.");
+          }
+        } else {
+          toast.info("تم إلغاء عملية الربط.");
+        }
+      } else if (err.code === "auth/popup-closed-by-user") {
+        toast.info("تم إغلاق نافذة التسجيل");
+      } else if (err.code === "auth/cancelled-popup-request") {
+        // popup request cancelled
+      } else {
+        toast.error("فشل التسجيل بواسطة Google");
+        setErrors((prev) => ({ ...prev, general: err.message }));
+      }
+    } finally {
+      setLoading(false);
+    }
+  };
+
   return (
     <div className="register-container">
 
@@ -279,9 +367,19 @@ const Register = () => {
         </div>
 
         {/* BUTTON */}
-        <button className="register-btn" onClick={handleSubmit}>
+        <button className="register-btn" onClick={handleSubmit} disabled={loading}>
           {loading ? "Loading..." : "Register"}
         </button>
+
+        <div className="or">
+          <span>أو</span>
+        </div>
+
+        <button className="google-btn" onClick={handleGoogleRegister} disabled={loading}>
+          <FcGoogle className="google-icon" />
+          <span>المتابعة باستخدام Google</span>
+        </button>
+
         {errors.general && (
           <p className="error" style={{ textAlign: "center", marginTop: "10px", fontSize: "14px", fontWeight: "bold" }}>
             {errors.general}

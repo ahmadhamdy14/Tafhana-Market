@@ -224,6 +224,7 @@
 }
 
 .checkout-form input,
+.checkout-form textarea,
 .form-row input {
   width: 100%;
   padding: 10px 14px;
@@ -234,9 +235,11 @@
   font-size: 14px;
   outline: none;
   transition: border-color 0.2s;
+  font-family: inherit;
 }
 
 .checkout-form input:focus,
+.checkout-form textarea:focus,
 .form-row input:focus {
   border-color: #8b5cf6;
 }

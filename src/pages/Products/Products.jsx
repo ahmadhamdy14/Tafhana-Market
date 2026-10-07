@@ -3,7 +3,7 @@ import { Link } from "react-router-dom";
 import { AuthContext } from "../../context/AuthContext";
 import { CartContext } from "../../context/CartContext";
 import { FavoritesContext } from "../../context/FavoritesContext";
-import { deleteProduct, migrateProductsKeywords } from "../../services/productService";
+import { deleteProduct } from "../../services/productService";
 import { useProductsPagination } from "../../hooks/useProductsPagination";
 import { useProductsSearch } from "../../hooks/useProductsSearch";
 import "./Products.css";
@@ -43,11 +43,7 @@ const Products = () => {
   const [showModal, setShowModal] = useState(false);
   const [selectedId, setSelectedId] = useState(null);
 
-  useEffect(() => {
-    if (userData?.role === "admin") {
-      migrateProductsKeywords();
-    }
-  }, [userData]);
+
 
   const fetchNextPageRef = useRef(null);
   fetchNextPageRef.current = isSearchActive ? fetchSearchNextPage : fetchNormalNextPage;

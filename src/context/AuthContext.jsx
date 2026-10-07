@@ -1,6 +1,6 @@
 import { createContext, useEffect, useState } from "react";
 import { auth, db } from "../firebase";
-import { doc, getDoc } from "firebase/firestore";
+import { doc, onSnapshot } from "firebase/firestore";
 
 export const AuthContext = createContext();
 
@@ -10,24 +10,43 @@ const AuthProvider = ({ children }) => {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const unsub = auth.onAuthStateChanged(async (u) => {
+    let unsubscribeDoc = null;
+
+    const unsubAuth = auth.onAuthStateChanged((u) => {
       setUser(u);
+
+      if (unsubscribeDoc) {
+        unsubscribeDoc();
+        unsubscribeDoc = null;
+      }
 
       if (u) {
         const docRef = doc(db, "users", u.uid);
-        const docSnap = await getDoc(docRef);
-
-        if (docSnap.exists()) {
-          setUserData(docSnap.data());
-        }
+        unsubscribeDoc = onSnapshot(
+          docRef,
+          (docSnap) => {
+            if (docSnap.exists()) {
+              setUserData(docSnap.data());
+            } else {
+              setUserData(null);
+            }
+            setLoading(false);
+          },
+          (err) => {
+            console.error("Error fetching user document:", err);
+            setLoading(false);
+          }
+        );
       } else {
         setUserData(null);
+        setLoading(false);
       }
-
-      setLoading(false);
     });
 
-    return () => unsub();
+    return () => {
+      unsubAuth();
+      if (unsubscribeDoc) unsubscribeDoc();
+    };
   }, []);
 
   return (
@@ -37,4 +56,4 @@ const AuthProvider = ({ children }) => {
   );
 };
 
-export default AuthProvider;
+export default AuthProvider;

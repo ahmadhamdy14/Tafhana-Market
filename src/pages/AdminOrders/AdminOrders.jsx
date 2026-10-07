@@ -230,10 +230,24 @@ const AdminOrders = () => {
                   <span className="info-label">رقم الهاتف</span>
                   <span className="info-value">{selected.customer?.phone || "—"}</span>
                 </div>
+                {selected.customer?.shopName && (
+                  <div className="modal-info-item">
+                    <span className="info-label">🏪 اسم المحل</span>
+                    <span className="info-value">{selected.customer.shopName}</span>
+                  </div>
+                )}
                 <div className="modal-info-item">
                   <span className="info-label">📍 العنوان</span>
                   <span className="info-value">{selected.customer?.address || "—"}</span>
                 </div>
+                {(selected.notes || selected.customer?.notes) && (
+                  <div className="modal-info-item" style={{ gridColumn: "1 / -1" }}>
+                    <span className="info-label">📝 ملاحظات</span>
+                    <span className="info-value" style={{ color: "#f59e0b", fontWeight: 600 }}>
+                      {selected.notes || selected.customer?.notes}
+                    </span>
+                  </div>
+                )}
                 <div className="modal-info-item">
                   <span className="info-label">💳 طريقة الدفع</span>
                   <span className="info-value" style={{ color: getPaymentInfo(selected.paymentMethod).color, fontWeight: 700 }}>

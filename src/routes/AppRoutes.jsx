@@ -23,12 +23,14 @@ const AppRoutes = () => {
       <MainLayout>
         <Routes>
 
+          {/* 🌐 Public Routes */}
+          <Route path="/" element={<Home />} />
+          <Route path="/products" element={<Products />} />
+          <Route path="/medical" element={<MedicalServices />} />
+
           {/* 🔐 Protected Routes */}
-          <Route path="/" element={<ProtectedRoute> <Home /> </ProtectedRoute>} />
-          <Route path="/medical" element={<ProtectedRoute> <MedicalServices /> </ProtectedRoute>} />
           <Route path="/cart" element={<ProtectedRoute> <Cart /> </ProtectedRoute>} />
           <Route path="/favorites" element={<ProtectedRoute> <Favorites /> </ProtectedRoute>} />
-          <Route path="/products" element={<ProtectedRoute> <Products /> </ProtectedRoute>} />
           <Route path="/order-success/:id" element={<ProtectedRoute> <OrderSuccess /> </ProtectedRoute>} />
           <Route path="/my-orders" element={<ProtectedRoute> <MyOrders /> </ProtectedRoute>} />
 
