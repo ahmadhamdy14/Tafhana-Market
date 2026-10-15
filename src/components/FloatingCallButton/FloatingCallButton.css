@@ -1,0 +1,271 @@
+/* ═══════════════════════════════════════════════════════════
+   FloatingCallButton — Fixed Click-to-Call FAB for Tafahna Market
+   ═══════════════════════════════════════════════════════════ */
+
+.floating-call-btn {
+  position: fixed;
+  bottom: 24px;
+  bottom: max(24px, env(safe-area-inset-bottom, 24px));
+  left: 24px;
+  left: max(24px, env(safe-area-inset-left, 24px));
+  right: auto;
+  top: auto;
+  z-index: 9000;
+
+  display: inline-flex;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 18px 10px 14px;
+  border-radius: 50px;
+  text-decoration: none;
+  cursor: pointer;
+  user-select: none;
+  -webkit-tap-highlight-color: transparent;
+
+  /* Theme styling (Dark default) */
+  background: rgba(22, 19, 48, 0.88);
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+  border: 1px solid rgba(139, 92, 246, 0.4);
+  box-shadow: 0 8px 24px rgba(15, 12, 41, 0.45),
+              0 2px 10px rgba(0, 0, 0, 0.25),
+              0 0 16px rgba(139, 92, 246, 0.18);
+
+  transition: transform 0.22s cubic-bezier(0.34, 1.56, 0.64, 1),
+              box-shadow 0.22s ease,
+              border-color 0.22s ease,
+              background 0.22s ease,
+              bottom 0.3s ease;
+  animation: floating-call-fade-in 0.45s cubic-bezier(0.34, 1.56, 0.64, 1) both;
+}
+
+/* ── Light Mode Override ─────────────────────────────────── */
+body.light .floating-call-btn {
+  background: rgba(255, 255, 255, 0.94);
+  border: 1px solid rgba(124, 58, 237, 0.25);
+  box-shadow: 0 8px 26px rgba(108, 92, 231, 0.16),
+              0 2px 8px rgba(0, 0, 0, 0.05);
+}
+
+/* ── Hover & Active States ────────────────────────────────── */
+.floating-call-btn:hover {
+  transform: translateY(-3px) scale(1.02);
+  border-color: rgba(34, 197, 94, 0.7);
+  box-shadow: 0 12px 32px rgba(15, 12, 41, 0.55),
+              0 0 24px rgba(34, 197, 94, 0.35);
+}
+
+body.light .floating-call-btn:hover {
+  border-color: rgba(22, 163, 74, 0.6);
+  box-shadow: 0 12px 30px rgba(22, 163, 74, 0.22),
+              0 4px 12px rgba(0, 0, 0, 0.08);
+}
+
+.floating-call-btn:active {
+  transform: translateY(-1px) scale(0.97);
+}
+
+.floating-call-btn:focus-visible {
+  outline: 3px solid #22c55e;
+  outline-offset: 3px;
+}
+
+/* ── Icon Section ────────────────────────────────────────── */
+.floating-call-btn__icon-wrapper {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 42px;
+  height: 42px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #22c55e 0%, #15803d 100%);
+  color: #ffffff;
+  flex-shrink: 0;
+  box-shadow: 0 3px 12px rgba(34, 197, 94, 0.45);
+}
+
+.floating-call-btn__icon {
+  font-size: 18px;
+  transition: transform 0.25s ease;
+}
+
+.floating-call-btn:hover .floating-call-btn__icon {
+  animation: phone-wiggle 0.75s ease-in-out infinite;
+}
+
+/* ── Subtle Radar Pulse Ring ─────────────────────────────── */
+.floating-call-btn__pulse {
+  position: absolute;
+  inset: -3px;
+  border-radius: 50%;
+  border: 2px solid rgba(34, 197, 94, 0.7);
+  opacity: 0;
+  pointer-events: none;
+  animation: phone-radar-pulse 2.6s cubic-bezier(0.24, 0, 0.38, 1) infinite;
+}
+
+/* ── Text Content ────────────────────────────────────────── */
+.floating-call-btn__content {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  text-align: right;
+  line-height: 1.25;
+  white-space: nowrap;
+}
+
+.floating-call-btn__title {
+  font-size: 13.5px;
+  font-weight: 700;
+  color: #ffffff;
+  letter-spacing: -0.01em;
+  transition: color 0.2s ease;
+}
+
+body.light .floating-call-btn__title {
+  color: #111827;
+}
+
+.floating-call-btn__subtitle {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 12px;
+  color: #cbd5f5;
+  margin-top: 2px;
+}
+
+body.light .floating-call-btn__subtitle {
+  color: #4b5563;
+}
+
+.floating-call-btn__action {
+  opacity: 0.85;
+}
+
+.floating-call-btn__number {
+  font-weight: 700;
+  color: #4ade80;
+  letter-spacing: 0.04em;
+  font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  direction: ltr;
+}
+
+body.light .floating-call-btn__number {
+  color: #15803d;
+}
+
+/* ── Stack Gracefully with Floating Install FAB ─────────── */
+body:has(.install-btn--floating) .floating-call-btn {
+  bottom: 84px;
+  bottom: calc(max(24px, env(safe-area-inset-bottom, 24px)) + 60px);
+}
+
+/* ── Entrance & Keyframe Animations ──────────────────────── */
+@keyframes floating-call-fade-in {
+  from {
+    opacity: 0;
+    transform: translateY(22px) scale(0.92);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+@keyframes phone-radar-pulse {
+  0% {
+    transform: scale(0.95);
+    opacity: 0.85;
+  }
+  50% {
+    transform: scale(1.35);
+    opacity: 0;
+  }
+  100% {
+    transform: scale(1.35);
+    opacity: 0;
+  }
+}
+
+@keyframes phone-wiggle {
+  0%, 100% {
+    transform: rotate(0deg);
+  }
+  15% {
+    transform: rotate(-14deg);
+  }
+  30% {
+    transform: rotate(14deg);
+  }
+  45% {
+    transform: rotate(-10deg);
+  }
+  60% {
+    transform: rotate(10deg);
+  }
+  75% {
+    transform: rotate(0deg);
+  }
+}
+
+/* ── Responsive Optimization ─────────────────────────────── */
+@media (max-width: 580px) {
+  .floating-call-btn {
+    bottom: 18px;
+    bottom: max(18px, env(safe-area-inset-bottom, 18px));
+    left: 14px;
+    left: max(14px, env(safe-area-inset-left, 14px));
+    padding: 8px 14px 8px 12px;
+    gap: 10px;
+    max-width: 48vw;
+  }
+
+  .floating-call-btn__icon-wrapper {
+    width: 38px;
+    height: 38px;
+  }
+
+  .floating-call-btn__icon {
+    font-size: 16px;
+  }
+
+  .floating-call-btn__title {
+    font-size: 12.5px;
+  }
+
+  .floating-call-btn__subtitle {
+    font-size: 11px;
+  }
+
+  body:has(.install-btn--floating) .floating-call-btn {
+    bottom: 76px;
+    bottom: calc(max(18px, env(safe-area-inset-bottom, 18px)) + 58px);
+  }
+}
+
+@media (max-width: 380px) {
+  .floating-call-btn {
+    padding: 7px 10px;
+    gap: 7px;
+    max-width: 47vw;
+  }
+
+  .floating-call-btn__title {
+    font-size: 12px;
+  }
+
+  .floating-call-btn__subtitle {
+    font-size: 10.5px;
+  }
+
+  .floating-call-btn__icon-wrapper {
+    width: 34px;
+    height: 34px;
+  }
+
+  .floating-call-btn__icon {
+    font-size: 14px;
+  }
+}

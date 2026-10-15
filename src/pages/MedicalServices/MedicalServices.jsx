@@ -1,4 +1,5 @@
 import { useState, useEffect, useContext } from "react";
+import { useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
 import { db } from "../../firebase";
 import { AuthContext } from "../../context/AuthContext";
@@ -15,7 +16,7 @@ import { Link } from "react-router-dom";
 import "./MedicalServices.css";
 
 // 📱 WhatsApp pharmacy/business number
-const WHATSAPP_NUMBER = "201069199985";
+const WHATSAPP_NUMBER = "201104152249";
 
 const PAYMENT_OPTIONS = [
   { value: "cash", label: "عند التوصيل", icon: "💵" },
@@ -52,7 +53,7 @@ export default function MedicalServices() {
   const { user, userData } = useContext(AuthContext);
   const [activeTab, setActiveTab] = useState("medicine"); // "medicine" | "doctors"
   const [copied, setCopied] = useState(false);
-
+  const navigate = useNavigate();
   const [doctors, setDoctors] = useState([]);
   const [loadingDoctors, setLoadingDoctors] = useState(true);
 
@@ -198,6 +199,7 @@ export default function MedicalServices() {
     e.preventDefault();
     if (!user) {
       toast.error("يرجى تسجيل الدخول أولاً لتتمكن من حجز موعد");
+      navigate("/login");
       return;
     }
 
@@ -555,12 +557,12 @@ export default function MedicalServices() {
                     {bookingForm.paymentMethod === "instapay" ? "📲 رقم انستا باي" : "🔴 رقم فودافون كاش"}
                   </span>
                   <div className="transfer-number-row">
-                    <span className="transfer-number">01069199985</span>
+                    <span className="transfer-number">01157718746</span>
                     <button
                       type="button"
                       className="copy-btn"
                       onClick={() => {
-                        navigator.clipboard.writeText("01069199985");
+                        navigator.clipboard.writeText("01157718746");
                         setCopied(true);
                         setTimeout(() => setCopied(false), 2000);
                       }}

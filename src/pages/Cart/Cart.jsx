@@ -7,7 +7,7 @@ import { Link, useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
 
 // 📱 WhatsApp business number (without + or spaces)
-const WHATSAPP_NUMBER = "201069199985";
+const WHATSAPP_NUMBER = "201104152249";
 
 const Cart = () => {
   const { cart, removeFromCart, clearCart, addToCart, decreaseQty } =
@@ -226,12 +226,12 @@ const Cart = () => {
                       {form.paymentMethod === "instapay" ? "📲 رقم انستا باي" : "🔴 رقم فودافون كاش"}
                     </span>
                     <div className="transfer-number-row">
-                      <span className="transfer-number">01069199985</span>
+                      <span className="transfer-number">01157718746</span>
                       <button
                         type="button"
                         className="copy-btn"
                         onClick={() => {
-                          navigator.clipboard.writeText("01069199985");
+                          navigator.clipboard.writeText("01157718746");
                           setCopied(true);
                           setTimeout(() => setCopied(false), 2000);
                         }}
