@@ -43,8 +43,8 @@ const OrderSuccess = () => {
       <div className="success-container">
         <div className="success-not-found">
           <h2>لم يتم العثور على الطلب 😕</h2>
-          <Link to="/products" className="success-back-btn">
-            الذهاب للمنتجات
+          <Link to="/store" className="success-back-btn">
+            الذهاب للمتجر 🛒
           </Link>
         </div>
       </div>
@@ -138,8 +138,8 @@ const OrderSuccess = () => {
           <span className="success-total-amount">{order.totalPrice?.toFixed(0)} EGP</span>
         </div>
 
-        <Link to="/products" className="success-back-btn">
-          متابعة التسوق 🛍️
+        <Link to="/store" className="success-back-btn">
+          متابعة التسوق في المتجر 🛍️
         </Link>
       </div>
     </div>

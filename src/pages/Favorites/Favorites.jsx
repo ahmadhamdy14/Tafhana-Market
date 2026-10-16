@@ -15,8 +15,8 @@ const Favorites = () => {
       {favorites.length === 0 ? (
         <div className="empty-favorites">
           <p>لم تضف أي منتج للمفضلات بعد.</p>
-          <Link to="/products" className="browse-btn">
-            الذهاب للمنتجات
+          <Link to="/store" className="browse-btn">
+            الذهاب للمتجر 🛒
           </Link>
         </div>
       ) : (

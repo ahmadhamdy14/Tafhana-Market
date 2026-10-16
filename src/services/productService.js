@@ -11,6 +11,7 @@ import {
   updateDoc,
 } from "firebase/firestore";
 import { db } from "../firebase";
+import { OFFICIAL_CATEGORY_NAMES } from "../constants/categories";
 
 const PRODUCTS_COLLECTION = "products";
 
@@ -63,10 +64,10 @@ export const migrateProductsKeywords = async () => {
     console.log("[Migration] Checking products database for missing searchKeywords...");
     const q = query(collection(db, PRODUCTS_COLLECTION));
     const snapshot = await getDocs(q);
-    
+
     let migratedCount = 0;
     const promises = [];
-    
+
     for (const docSnap of snapshot.docs) {
       const data = docSnap.data();
       if (!data.searchKeywords) {
@@ -79,7 +80,7 @@ export const migrateProductsKeywords = async () => {
         );
       }
     }
-    
+
     if (promises.length > 0) {
       await Promise.all(promises);
       console.log(`[Migration] Successfully migrated ${migratedCount} products with searchKeywords.`);
@@ -99,30 +100,30 @@ export const deleteProduct = async (id) => {
 };
 
 /**
- * Fetch a page of normal products ordered by document ID (__name__).
+ * Fetch a page of products ordered by document ID (__name__), optionally filtered by category.
  * 
  * @param {Object} options
+ * @param {string|null} options.category - Category name to filter by (or null for all)
  * @param {any} options.lastDoc - Last document snapshot for pagination
  * @param {number} options.limitCount - Number of products to fetch
  * @returns {Promise<{ products: Array, lastDoc: any, hasMore: boolean }>}
  */
-export const fetchProducts = async ({ lastDoc = null, limitCount = 10 } = {}) => {
-  let q;
-  if (lastDoc) {
-    q = query(
-      collection(db, PRODUCTS_COLLECTION),
-      orderBy("__name__"),
-      startAfter(lastDoc),
-      limit(limitCount)
-    );
+export const fetchProducts = async ({ category = null, lastDoc = null, limitCount = 10 } = {}) => {
+  let constraints = [];
+
+  if (category && category !== "الكل") {
+    constraints.push(where("category", "==", category));
   } else {
-    q = query(
-      collection(db, PRODUCTS_COLLECTION),
-      orderBy("__name__"),
-      limit(limitCount)
-    );
+    constraints.push(orderBy("__name__"));
   }
 
+  if (lastDoc) {
+    constraints.push(startAfter(lastDoc));
+  }
+
+  constraints.push(limit(limitCount));
+
+  const q = query(collection(db, PRODUCTS_COLLECTION), ...constraints);
   const snapshot = await getDocs(q);
   const products = snapshot.docs.map((doc) => ({
     id: doc.id,
@@ -140,15 +141,17 @@ export const fetchProducts = async ({ lastDoc = null, limitCount = 10 } = {}) =>
 };
 
 /**
- * Fetch a page of products matching a search query using searchable keywords array-contains.
+ * Fetch a page of products matching a search query using searchable keywords array-contains,
+ * optionally filtered by category.
  * 
  * @param {Object} options
  * @param {string} options.searchQuery - The search query term
+ * @param {string|null} options.category - Category name to filter by (or null for all)
  * @param {any} options.lastDoc - Last document snapshot for pagination
  * @param {number} options.limitCount - Number of products to fetch
  * @returns {Promise<{ products: Array, lastDoc: any, hasMore: boolean }>}
  */
-export const fetchProductsSearch = async ({ searchQuery, lastDoc = null, limitCount = 10 }) => {
+export const fetchProductsSearch = async ({ searchQuery, category = null, lastDoc = null, limitCount = 10 }) => {
   const term = searchQuery.toLowerCase().trim();
   if (!term) {
     return {
@@ -158,34 +161,91 @@ export const fetchProductsSearch = async ({ searchQuery, lastDoc = null, limitCo
     };
   }
 
-  let q;
-  if (lastDoc) {
-    q = query(
-      collection(db, PRODUCTS_COLLECTION),
-      where("searchKeywords", "array-contains", term),
-      startAfter(lastDoc),
-      limit(limitCount)
-    );
-  } else {
-    q = query(
-      collection(db, PRODUCTS_COLLECTION),
-      where("searchKeywords", "array-contains", term),
-      limit(limitCount)
-    );
+  let constraints = [where("searchKeywords", "array-contains", term)];
+  if (category && category !== "الكل") {
+    constraints.push(where("category", "==", category));
   }
 
-  const snapshot = await getDocs(q);
-  const products = snapshot.docs.map((doc) => ({
-    id: doc.id,
-    ...doc.data(),
-  }));
+  if (lastDoc) {
+    constraints.push(startAfter(lastDoc));
+  }
+  constraints.push(limit(limitCount));
 
-  const nextLastDoc = snapshot.docs[snapshot.docs.length - 1] || null;
-  const hasMore = snapshot.docs.length === limitCount;
+  try {
+    const q = query(collection(db, PRODUCTS_COLLECTION), ...constraints);
+    const snapshot = await getDocs(q);
+    const products = snapshot.docs.map((doc) => ({
+      id: doc.id,
+      ...doc.data(),
+    }));
 
-  return {
-    products,
-    lastDoc: nextLastDoc,
-    hasMore,
-  };
+    const nextLastDoc = snapshot.docs[snapshot.docs.length - 1] || null;
+    const hasMore = snapshot.docs.length === limitCount;
+
+    return {
+      products,
+      lastDoc: nextLastDoc,
+      hasMore,
+    };
+  } catch (error) {
+    console.warn("Category search composite query fallback:", error);
+    // Fallback: search by keywords and filter in memory
+    let fallbackConstraints = [where("searchKeywords", "array-contains", term)];
+    if (lastDoc) fallbackConstraints.push(startAfter(lastDoc));
+    fallbackConstraints.push(limit(limitCount * 2));
+
+    const fallbackQ = query(collection(db, PRODUCTS_COLLECTION), ...fallbackConstraints);
+    const snapshot = await getDocs(fallbackQ);
+    let products = snapshot.docs.map((doc) => ({
+      id: doc.id,
+      ...doc.data(),
+    }));
+
+    if (category && category !== "الكل") {
+      products = products.filter((p) => p.category === category);
+    }
+
+    const nextLastDoc = snapshot.docs[snapshot.docs.length - 1] || null;
+    const hasMore = snapshot.docs.length === limitCount * 2;
+
+    return {
+      products,
+      lastDoc: nextLastDoc,
+      hasMore,
+    };
+  }
 };
+
+/**
+ * Fetch products that do not have an official category assigned.
+ * Safe for backward compatibility with existing ~500 products.
+ */
+export const fetchUncategorizedProducts = async () => {
+  const snapshot = await getDocs(collection(db, PRODUCTS_COLLECTION));
+  const uncategorized = [];
+
+  snapshot.docs.forEach((docSnap) => {
+    const data = docSnap.data();
+    const cat = data.category ? String(data.category).trim() : "";
+    if (!cat || !OFFICIAL_CATEGORY_NAMES.includes(cat)) {
+      uncategorized.push({
+        id: docSnap.id,
+        ...data,
+        rawCategory: cat || "غير مصنف",
+      });
+    }
+  });
+
+  return uncategorized;
+};
+
+/**
+ * Safely update a product's category in Firestore.
+ */
+export const updateProductCategory = async (productId, newCategory) => {
+  const productRef = doc(db, PRODUCTS_COLLECTION, productId);
+  await updateDoc(productRef, {
+    category: newCategory,
+  });
+};
+

@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef } from "react";
 import { fetchProductsSearch } from "../services/productService";
 
-export const useProductsSearch = () => {
+export const useProductsSearch = (category = null) => {
   const [search, setSearch] = useState("");
   const [debouncedSearch, setDebouncedSearch] = useState("");
   const [products, setProducts] = useState([]);
@@ -15,6 +15,7 @@ export const useProductsSearch = () => {
   const lastDocRef = useRef(lastDoc);
   const debouncedSearchRef = useRef(debouncedSearch);
   const activeSearchTermRef = useRef("");
+  const categoryRef = useRef(category);
 
   useEffect(() => {
     loadingRef.current = loading;
@@ -31,6 +32,10 @@ export const useProductsSearch = () => {
   useEffect(() => {
     debouncedSearchRef.current = debouncedSearch;
   }, [debouncedSearch]);
+
+  useEffect(() => {
+    categoryRef.current = category;
+  }, [category]);
 
   // Debounce search input
   useEffect(() => {
@@ -67,6 +72,7 @@ export const useProductsSearch = () => {
     try {
       const result = await fetchProductsSearch({
         searchQuery: activeSearch,
+        category: categoryRef.current,
         lastDoc: isFirstLoad ? null : lastDocRef.current,
         limitCount: 10,
       });
@@ -89,7 +95,7 @@ export const useProductsSearch = () => {
       setLastDoc(result.lastDoc);
       setHasMore(result.hasMore);
     } catch (error) {
-      console.error("Error fetching products:", error);
+      console.error("Error fetching search products:", error);
     } finally {
       if (currentFetchTerm === activeSearchTermRef.current) {
         loadingRef.current = false;
@@ -98,7 +104,7 @@ export const useProductsSearch = () => {
     }
   };
 
-  // Handle transition in/out of search mode
+  // Handle transition in/out of search mode or category change
   useEffect(() => {
     const handleSearchChange = async () => {
       if (debouncedSearch) {
@@ -117,7 +123,7 @@ export const useProductsSearch = () => {
     };
 
     handleSearchChange();
-  }, [debouncedSearch]);
+  }, [debouncedSearch, category]);
 
   const deleteProductFromState = (id) => {
     setProducts((prev) => prev.filter((p) => p.id !== id));

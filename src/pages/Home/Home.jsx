@@ -17,14 +17,14 @@ export default function Home() {
         <h2 className="section-title">اختر الخدمة المطلوبة للبدء</h2>
 
         <div className="services-grid">
-          {/* Card 1: Browse Products */}
-          <Link to="/products" className="service-card">
+          {/* Card 1: Browse Store Categories */}
+          <Link to="/store" className="service-card">
             <div className="card-image-wrap">
               <img src="/products-card.png" alt="المنتجات الغذائية والاستهلاكية" />
             </div>
             <div className="service-card-body">
-              <h3>تصفح المنتجات</h3>
-              <p>استكشف جميع الأغذية، المنظفات، والسلع الاستهلاكية المتاحة واطلبها مباشرة لتصلك حتى باب البيت.</p>
+              <h3>أقسام المتجر</h3>
+              <p>استكشف جميع أقسام الأغذية، الوجبات، المخبوزات، المقلة، المنظفات، وخدمات الموبايل والشحن الفوري واطلب مباشرة لتصلك حتى باب البيت.</p>
               <span className="cta-btn">الذهاب إلى المتجر 🛒</span>
             </div>
           </Link>

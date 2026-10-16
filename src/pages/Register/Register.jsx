@@ -157,7 +157,7 @@ const Register = () => {
       });
 
       toast.success("تم تسجيل الدخول بنجاح 🎉");
-      navigate("/products");
+      navigate("/store");
     } catch (error) {
       if (error.code === "auth/email-already-in-use") {
         toast.error("هذا البريد الالكتروني مسجل بالفعل . ");
@@ -217,7 +217,7 @@ const Register = () => {
       }
 
       toast.success("تم تسجيل الدخول بنجاح 🎉");
-      navigate("/products");
+      navigate("/store");
     } catch (err) {
       if (err.code === "auth/account-exists-with-different-credential") {
         // 🔑 Account exists with password. Link Google provider to existing account without removing password.
@@ -236,7 +236,7 @@ const Register = () => {
             const userCred = await signInWithEmailAndPassword(auth, email, passwordToUse);
             await linkWithCredential(userCred.user, pendingCred);
             toast.success("تم ربط حساب Google وتسجيل الدخول بنجاح 🎉");
-            navigate("/products");
+            navigate("/store");
             return;
           } catch (linkErr) {
             toast.error("كلمة المرور غير صحيحة. لم يتم ربط الحساب.");

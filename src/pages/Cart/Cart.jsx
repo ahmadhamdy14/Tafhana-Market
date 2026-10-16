@@ -130,7 +130,7 @@ const Cart = () => {
         <div className="empty-box">
           <h2> 😢سله المشتريات فارغه </h2>
           <br />
-          <Link to="/products" className="browse-btn">
+          <Link to="/store" className="browse-btn">
             اذهب لشراء
           </Link>
         </div>
@@ -166,7 +166,7 @@ const Cart = () => {
                 </div>
               );
             })}
-            <Link to="/products" className="browse-btn">
+            <Link to="/store" className="browse-btn">
               اذهب لشراء المزيد
             </Link>
           </div>

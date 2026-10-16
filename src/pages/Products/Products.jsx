@@ -1,23 +1,28 @@
 import { useEffect, useState, useContext, useRef } from "react";
-import { Link } from "react-router-dom";
+import { Link, useParams } from "react-router-dom";
 import { AuthContext } from "../../context/AuthContext";
 import { CartContext } from "../../context/CartContext";
 import { FavoritesContext } from "../../context/FavoritesContext";
 import { deleteProduct } from "../../services/productService";
 import { useProductsPagination } from "../../hooks/useProductsPagination";
 import { useProductsSearch } from "../../hooks/useProductsSearch";
+import { CATEGORIES, getCategoryBySlug } from "../../constants/categories";
 import "./Products.css";
 
 const WHATSAPP_NUMBER = "201104152249";
 
 const Products = () => {
+  const { categorySlug } = useParams();
+  const currentCategory = categorySlug ? getCategoryBySlug(categorySlug) : null;
+  const categoryFilter = currentCategory ? currentCategory.name : null;
+
   const {
     products: normalProducts,
     loading: normalLoading,
     hasMore: normalHasMore,
     fetchNextPage: fetchNormalNextPage,
     deleteProductFromState: deleteNormalProduct,
-  } = useProductsPagination();
+  } = useProductsPagination(categoryFilter);
 
   const {
     search,
@@ -28,13 +33,12 @@ const Products = () => {
     hasMore: searchHasMore,
     fetchNextPage: fetchSearchNextPage,
     deleteProductFromState: deleteSearchProduct,
-  } = useProductsSearch();
+  } = useProductsSearch(categoryFilter);
 
   const products = isSearchActive ? searchProducts : normalProducts;
   const loading = isSearchActive ? searchLoading : normalLoading;
   const hasMore = isSearchActive ? searchHasMore : normalHasMore;
 
-  const [selectedCategory, setSelectedCategory] = useState("الكل");
   const [clickedId, setClickedId] = useState(null);
   const { userData } = useContext(AuthContext);
   const { cart, addToCart, decreaseQty } = useContext(CartContext);
@@ -42,8 +46,6 @@ const Products = () => {
 
   const [showModal, setShowModal] = useState(false);
   const [selectedId, setSelectedId] = useState(null);
-
-
 
   const fetchNextPageRef = useRef(null);
   fetchNextPageRef.current = isSearchActive ? fetchSearchNextPage : fetchNormalNextPage;
@@ -105,45 +107,78 @@ const Products = () => {
 
   return (
     <div className="products">
-      <div className="products-header-container">
-        <h1>المنتجات </h1>
+      {/* 🧭 Navigation Header */}
+      <div className="products-top-navigation">
+        <Link to="/store" className="back-to-store-btn">
+          <span>←</span> الرجوع إلى أقسام المتجر
+        </Link>
         <Link to="/medical" className="go-to-medical-btn">
-          الذهاب الي الخدمات الطبية🏥
+          الخدمات الطبية 🩺
         </Link>
       </div>
 
-      {/* 🔍 Search */}
+      <div className="products-header-container">
+        {currentCategory ? (
+          <div className="category-hero-header" style={{ "--cat-accent": currentCategory.accentColor }}>
+            <div className="category-title-badge">
+              <span className="cat-icon-lg">{currentCategory.icon}</span>
+              <h1>قسم {currentCategory.name}</h1>
+              <span className="cat-en-sub">{currentCategory.nameEn}</span>
+            </div>
+            <p className="category-header-desc">{currentCategory.description}</p>
+          </div>
+        ) : (
+          <div className="all-products-header">
+            <h1>جميع المنتجات</h1>
+            <p>تصفح كافة منتجات تفهنا ماركت في مكان واحد أو اختر قسماً محدداً</p>
+          </div>
+        )}
+      </div>
+
+      {/* 🏷️ Quick Category Pills Switcher */}
+      <div className="categories-filter">
+        <Link
+          to="/products"
+          className={`category-btn ${!categoryFilter ? "active" : ""}`}
+        >
+          🌟 الكل
+        </Link>
+        {CATEGORIES.map((cat) => {
+          const isActive = categoryFilter === cat.name;
+          return (
+            <Link
+              key={cat.id}
+              to={`/store/${cat.slug}`}
+              className={`category-btn ${isActive ? "active" : ""}`}
+              style={isActive ? { backgroundColor: cat.accentColor, borderColor: cat.accentColor } : {}}
+            >
+              <span>{cat.icon}</span> {cat.name}
+            </Link>
+          );
+        })}
+      </div>
+
+      {/* 🔍 Search Input */}
       <div className="search-box">
         <input
           type="text"
-          placeholder="ابحث عن منتج..."
+          placeholder={
+            currentCategory
+              ? `ابحث داخل قسم ${currentCategory.name}...`
+              : "ابحث عن أي منتج..."
+          }
           value={search}
-          onChange={(e) => {
-            console.log(`[Search Debug] Input search term updated to: "${e.target.value}"`);
-            setSearch(e.target.value);
-          }}
+          onChange={(e) => setSearch(e.target.value)}
         />
       </div>
 
-      {/* 🏷️ Categories */}
-      <div className="categories-filter">
-        {["الكل", ...new Set(products.map(p => p.category || "متنوع"))].map((cat, index) => (
-          <button
-            key={index}
-            className={`category-btn ${selectedCategory === cat ? 'active' : ''}`}
-            onClick={() => setSelectedCategory(cat)}
-          >
-            {cat}
-          </button>
-        ))}
-      </div>
-
-      {/* 📦 Grid */}
+      {/* 📦 Product Grid */}
       {(() => {
         const filteredProducts = products.filter((p) => {
-          const matchSearch = p.name.toLowerCase().includes(search.toLowerCase()) ||
+          const matchSearch =
+            p.name.toLowerCase().includes(search.toLowerCase()) ||
             p.description?.toLowerCase().includes(search.toLowerCase());
-          const matchCategory = selectedCategory === "الكل" || (p.category || "متنوع") === selectedCategory;
+          const matchCategory = !categoryFilter || p.category === categoryFilter;
           return matchSearch && matchCategory;
         });
 
@@ -153,7 +188,7 @@ const Products = () => {
               {filteredProducts.map((product) => {
                 const cartItem = cart.find((c) => c.id === product.id);
 
-                // 💰 حساب السعر بعد الخصم
+                // 💰 Calculation of discounted price
                 const finalPrice =
                   product.price -
                   (product.price * (product.discount || 0)) / 100;
@@ -164,14 +199,23 @@ const Products = () => {
                     <button
                       className="heart-btn"
                       onClick={() => toggleFavorite(product)}
+                      aria-label="إضافة للمفضلة"
                     >
                       {isFavorite(product.id) ? "❤️" : "🤍"}
                     </button>
 
-                    <img src={product.image} alt={product.name} />
+                    <img src={product.image} alt={product.name} loading="lazy" />
                     <div className="card-body">
-                      <span className="category-badge">{product.category || "متنوع"}</span>
-                      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+                      <span className="category-badge">
+                        {product.category || "غير مصنف"}
+                      </span>
+                      <div
+                        style={{
+                          display: "flex",
+                          justifyContent: "space-between",
+                          alignItems: "center",
+                        }}
+                      >
                         <h3>{product.name}</h3>
                         {product.discount > 0 && (
                           <span className="badge">
@@ -180,10 +224,11 @@ const Products = () => {
                         )}
                       </div>
                       <p>{product.description}</p>
+                      
                       {/* 💰 PRICE BOX */}
                       <div className="price-box">
                         {product.discount > 0 && (
-                          < span className="old-price">
+                          <span className="old-price">
                             {product.price} جنيه
                           </span>
                         )}
@@ -196,15 +241,16 @@ const Products = () => {
 
                       {/* 🛒 ADD / QTY BOX */}
                       {cartItem ? (
-                        < div className="qty-box">
+                        <div className="qty-box">
                           <button onClick={() => decreaseQty(product.id)}>-</button>
                           <span>{cartItem.qty}</span>
                           <button onClick={() => addToCart(product)}>+</button>
                         </div>
                       ) : (
                         <button
-                          className={`add-btn ${clickedId === product.id ? "added" : ""
-                            }`}
+                          className={`add-btn ${
+                            clickedId === product.id ? "added" : ""
+                          }`}
                           onClick={() => {
                             addToCart(product);
                             setClickedId(product.id);
@@ -220,14 +266,15 @@ const Products = () => {
                       {/* ❌ DELETE & EDIT (Admin only) */}
                       {userData?.role === "admin" && (
                         <div className="admin-actions">
-                          <Link to={`/edit-product/${product.id}`} className="edit-btn">
+                          <Link
+                            to={`/edit-product/${product.id}`}
+                            className="edit-btn"
+                          >
                             ✏️ تعديل
                           </Link>
                           <button
                             className="delete-btn"
-                            onClick={() =>
-                              handleDeleteClick(product.id)
-                            }
+                            onClick={() => handleDeleteClick(product.id)}
                           >
                             🗑️ حذف
                           </button>
@@ -238,27 +285,47 @@ const Products = () => {
                 );
               })}
 
-              {/* ➕ Add Product */}
+              {/* ➕ Add Product (Admin Only) */}
               {userData?.role === "admin" && (
-                <Link to="/add-product" className="card add-card">
+                <Link
+                  to={`/add-product${
+                    categoryFilter
+                      ? `?category=${encodeURIComponent(categoryFilter)}`
+                      : ""
+                  }`}
+                  className="card add-card"
+                >
                   <div className="card-body add-card-body">
                     <span className="plus">+</span>
-                    <h3>إضافة منتج</h3>
+                    <h3>
+                      إضافة منتج
+                      {categoryFilter ? ` في قسم ${categoryFilter}` : ""}
+                    </h3>
                   </div>
                 </Link>
               )}
             </div>
 
-            {/* 📦 No results empty state */}
-            {isSearchActive && search.trim() && filteredProducts.length === 0 && !loading && (
+            {/* 📦 Empty state when no products match */}
+            {filteredProducts.length === 0 && !loading && (
               <div className="search-empty-state">
-                <div className="search-empty-icon">🛒</div>
-                <h3 className="search-empty-title">لم نجد المنتج الذي تبحث عنه</h3>
+                <div className="search-empty-icon">
+                  {currentCategory ? currentCategory.icon : "🛒"}
+                </div>
+                <h3 className="search-empty-title">
+                  {isSearchActive && search.trim()
+                    ? `لم نجد منتجات تطابق "${search}"`
+                    : `لا توجد منتجات في هذا القسم حالياً`}
+                </h3>
                 <p className="search-empty-desc">
-                  هل تريد طلب <strong>"{search}"</strong> كلمنا عبر واتساب؟
+                  هل تريد طلب هذا المنتج أو الاستفسار عنه؟ كلمنا عبر واتساب وسنوفر لك فوراً!
                 </p>
                 <a
-                  href={`https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent(`مرحبا، لم أجد المنتج "‏${search}‏" على الموقع. هل هو متوفر؟`)}`}
+                  href={`https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent(
+                    search.trim()
+                      ? `مرحبا، أبحث عن المنتج "${search}" في تفهنا ماركت هل هو متوفر؟`
+                      : `مرحبا، أود الاستفسار عن منتجات قسم ${categoryFilter || "المتجر"}`
+                  )}`}
                   target="_blank"
                   rel="noopener noreferrer"
                   className="search-wa-btn"
@@ -282,7 +349,9 @@ const Products = () => {
         {!hasMore && products.length > 0 && (
           <div className="no-more-products">
             <a
-              href={`https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent("مرحبا، لم أجد المنتج الذي أبحث عنه. هل يمكنكم مساعدتي؟")}`}
+              href={`https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent(
+                "مرحبا، لم أجد المنتج الذي أبحث عنه. هل يمكنكم مساعدتي؟"
+              )}`}
               target="_blank"
               rel="noopener noreferrer"
               className="end-list-wa-link"
@@ -293,33 +362,23 @@ const Products = () => {
         )}
       </div>
 
-      {/* ⚠️ Modal */}
-      {
-        showModal && (
-          <div className="modal-overlay">
-            <div className="modal-box">
-              <h3>هل أنت متأكد من حذف هذا المنتج؟</h3>
-
-              <div className="modal-actions">
-                <button
-                  className="yes-btn"
-                  onClick={confirmDelete}
-                >
-                  نعم
-                </button>
-
-                <button
-                  className="no-btn"
-                  onClick={cancelDelete}
-                >
-                  لا
-                </button>
-              </div>
+      {/* ⚠️ Delete Confirmation Modal */}
+      {showModal && (
+        <div className="modal-overlay">
+          <div className="modal-box">
+            <h3>هل أنت متأكد من حذف هذا المنتج؟</h3>
+            <div className="modal-actions">
+              <button className="yes-btn" onClick={confirmDelete}>
+                نعم
+              </button>
+              <button className="no-btn" onClick={cancelDelete}>
+                لا
+              </button>
             </div>
           </div>
-        )
-      }
-    </div >
+        </div>
+      )}
+    </div>
   );
 };
 

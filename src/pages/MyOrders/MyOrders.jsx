@@ -131,8 +131,8 @@ const MyOrders = () => {
       </div>
 
       <div className="my-orders-cta">
-        <Link to="/products" className="my-orders-browse-btn">
-          🛍️اذهب لشراء المزيد
+        <Link to="/store" className="my-orders-browse-btn">
+          🛍️ اذهب للمتجر لشراء المزيد
         </Link>
       </div>
     </div>

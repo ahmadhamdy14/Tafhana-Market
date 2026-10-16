@@ -1,4 +1,4 @@
-import { BrowserRouter, Routes, Route } from "react-router-dom";
+import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import MainLayout from "../layouts/MainLayout";
 import Login from "../pages/Login/Login";
 import Register from "../pages/Register/Register";
@@ -6,6 +6,7 @@ import ProtectedRoute from "./ProtectedRoute";
 import AdminRoute from "./AdminRoute";
 import Admin from "../pages/Admin/Admin";
 import Products from "../pages/Products/Products";
+import StoreCategories from "../pages/StoreCategories/StoreCategories";
 import AddProduct from "../pages/AddProduct/AddProduct";
 import EditProduct from "../pages/EditProduct/EditProduct";
 import Cart from "../pages/Cart/Cart";
@@ -25,6 +26,8 @@ const AppRoutes = () => {
 
           {/* 🌐 Public Routes */}
           <Route path="/" element={<Home />} />
+          <Route path="/store" element={<StoreCategories />} />
+          <Route path="/store/:categorySlug" element={<Products />} />
           <Route path="/products" element={<Products />} />
           <Route path="/medical" element={<MedicalServices />} />
 
@@ -34,7 +37,7 @@ const AppRoutes = () => {
           <Route path="/order-success/:id" element={<ProtectedRoute> <OrderSuccess /> </ProtectedRoute>} />
           <Route path="/my-orders" element={<ProtectedRoute> <MyOrders /> </ProtectedRoute>} />
 
-          {/* 🌐 Public Routes */}
+          {/* 🌐 Public Auth Routes */}
           <Route path="/login" element={<Login />} />
           <Route path="/register" element={<Register />} />
           <Route path="/forgot-password" element={<ForgotPassword />} />
@@ -42,8 +45,11 @@ const AppRoutes = () => {
           {/* 🚫 Admin Only Routes */}
           <Route path="/admin" element={<AdminRoute> <Admin /> </AdminRoute>} />
           <Route path="/admin/orders" element={<AdminRoute> <AdminOrders /> </AdminRoute>} />
-          <Route path="/add-product" element={<AddProduct />} />
-          <Route path="/edit-product/:id" element={<EditProduct />} />
+          <Route path="/add-product" element={<AdminRoute> <AddProduct /> </AdminRoute>} />
+          <Route path="/edit-product/:id" element={<AdminRoute> <EditProduct /> </AdminRoute>} />
+
+          {/* 🔄 Fallback */}
+          <Route path="*" element={<Navigate to="/" replace />} />
 
         </Routes>
       </MainLayout>

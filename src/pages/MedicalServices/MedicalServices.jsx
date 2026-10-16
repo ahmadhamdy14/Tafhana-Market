@@ -340,7 +340,7 @@ export default function MedicalServices() {
       <div className="medical-header">
         <h1>الخدمات الطبية والرعاية الصحية</h1>
         <p>اطلب أدويتك الطبية أو احجز موعد كشف مباشر مع أفضل الأطباء المتخصصين</p>
-        <Link to="/products" className="go-to-medical-btn">الذهاب إلى المتجر 🛒</Link>
+        <Link to="/store" className="go-to-medical-btn">الذهاب إلى المتجر 🛒</Link>
       </div>
 
       {/* Tabs Switcher */}

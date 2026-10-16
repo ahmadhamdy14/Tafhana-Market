@@ -7,11 +7,108 @@
 
 .products {
   text-align: center;
+  direction: rtl;
 }
 
-.products-header-container h1 {
-  margin-bottom: 20px;
+/* 🧭 Top Navigation Bar */
+.products-top-navigation {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  max-width: 1200px;
+  margin: 0 auto 25px auto;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+
+.back-to-store-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 20px;
+  background: var(--bg-right);
+  color: var(--text) !important;
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  font-weight: 700;
+  font-size: 14px;
+  text-decoration: none !important;
+  transition: all 0.25s ease;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+}
+
+.back-to-store-btn:hover,
+.back-to-store-btn:focus,
+.back-to-store-btn:visited {
+  border-color: #8b5cf6;
+  color: #8b5cf6 !important;
+  transform: translateX(4px);
+  text-decoration: none !important;
+}
+
+.back-to-store-btn span {
+  font-size: 16px;
+}
+
+/* 🌟 Category Hero Header */
+.category-hero-header {
+  background: linear-gradient(135deg, rgba(139, 92, 246, 0.12) 0%, rgba(16, 185, 129, 0.05) 100%);
+  border: 1px solid var(--border);
+  border-radius: 24px;
+  padding: 30px 25px;
+  max-width: 900px;
+  margin: 0 auto 25px auto;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.04);
+}
+
+.category-title-badge {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  flex-wrap: wrap;
+  margin-bottom: 8px;
+}
+
+.cat-icon-lg {
+  font-size: 34px;
+}
+
+.category-hero-header h1 {
+  margin: 0;
   font-size: 32px;
+  font-weight: 800;
+  color: var(--text);
+}
+
+.cat-en-sub {
+  font-size: 12px;
+  font-weight: 700;
+  text-transform: uppercase;
+  color: var(--cat-accent, #8b5cf6);
+  background: rgba(139, 92, 246, 0.12);
+  padding: 4px 10px;
+  border-radius: 8px;
+}
+
+.category-header-desc {
+  font-size: 15px;
+  color: var(--sub);
+  max-width: 600px;
+  margin: 10px auto 0 auto;
+  line-height: 1.6;
+}
+
+.all-products-header h1 {
+  margin-bottom: 8px;
+  font-size: 32px;
+  font-weight: 800;
+}
+
+.all-products-header p {
+  color: var(--sub);
+  font-size: 15px;
+  margin-bottom: 20px;
 }
 
 .go-to-medical-btn {
@@ -24,10 +121,9 @@
   text-decoration: none;
   border-radius: 12px;
   font-weight: 700;
-  font-size: 15px;
+  font-size: 14px;
   transition: all 0.3s ease;
   box-shadow: 0 4px 15px rgba(22, 163, 74, 0.2);
-  margin: 10px;
 }
 
 .go-to-medical-btn:hover {
@@ -36,10 +132,16 @@
 }
 
 @media (max-width: 768px) {
-  .products-header-container {
+  .products-top-navigation {
     justify-content: center;
-    flex-direction: column;
-    text-align: center;
+  }
+
+  .category-hero-header {
+    padding: 20px 16px;
+  }
+
+  .category-hero-header h1 {
+    font-size: 24px;
   }
 }
 
@@ -74,6 +176,7 @@
   margin-bottom: 30px;
 }
 
+.categories-filter a,
 .category-btn {
   padding: 8px 16px;
   border: 1px solid var(--border);
@@ -83,6 +186,19 @@
   cursor: pointer;
   transition: 0.3s;
   font-size: 14px;
+  text-decoration: none !important;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.categories-filter a:hover,
+.categories-filter a:focus,
+.categories-filter a:visited,
+.category-btn:hover,
+.category-btn:focus,
+.category-btn:visited {
+  text-decoration: none !important;
 }
 
 .category-btn:hover {
@@ -94,6 +210,7 @@
   background: #8b5cf6;
   color: #fff;
   border-color: #8b5cf6;
+  text-decoration: none !important;
 }
 
 /* 🏷️ CATEGORY BADGE */
@@ -108,6 +225,7 @@
   font-weight: 600;
   text-transform: uppercase;
   letter-spacing: 0.5px;
+  text-decoration: none !important;
 }
 
 /* 📦 GRID */

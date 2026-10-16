@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef } from "react";
 import { fetchProducts } from "../services/productService";
 
-export const useProductsPagination = () => {
+export const useProductsPagination = (category = null) => {
   const [products, setProducts] = useState([]);
   const [loading, setLoading] = useState(false);
   const [hasMore, setHasMore] = useState(true);
@@ -10,6 +10,7 @@ export const useProductsPagination = () => {
   const loadingRef = useRef(loading);
   const hasMoreRef = useRef(hasMore);
   const lastDocRef = useRef(lastDoc);
+  const categoryRef = useRef(category);
 
   useEffect(() => {
     loadingRef.current = loading;
@@ -22,6 +23,10 @@ export const useProductsPagination = () => {
   useEffect(() => {
     lastDocRef.current = lastDoc;
   }, [lastDoc]);
+
+  useEffect(() => {
+    categoryRef.current = category;
+  }, [category]);
 
   const fetchNextPage = async (isFirstLoad = false) => {
     // Only prevent concurrent requests for page scrolling (isFirstLoad === false)
@@ -37,6 +42,7 @@ export const useProductsPagination = () => {
 
     try {
       const result = await fetchProducts({
+        category: categoryRef.current,
         lastDoc: isFirstLoad ? null : lastDocRef.current,
         limitCount: 10,
       });
@@ -61,10 +67,13 @@ export const useProductsPagination = () => {
     }
   };
 
-  // Initial load
+  // Reload whenever category changes
   useEffect(() => {
+    setProducts([]);
+    setLastDoc(null);
+    setHasMore(true);
     fetchNextPage(true);
-  }, []);
+  }, [category]);
 
   const deleteProductFromState = (id) => {
     setProducts((prev) => prev.filter((p) => p.id !== id));

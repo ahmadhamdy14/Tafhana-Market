@@ -99,8 +99,8 @@ const Header = () => {
           <Link to="/" onClick={() => setOpen(false)}>
             الرئيسية
           </Link>
-          <Link to="/products" onClick={() => setOpen(false)}>
-            المنتجات
+          <Link to="/store" onClick={() => setOpen(false)}>
+            المتجر 🛒
           </Link>
           <Link to="/medical" onClick={() => setOpen(false)}>
             الخدمات الطبية 🩺

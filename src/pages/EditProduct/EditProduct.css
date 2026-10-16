@@ -53,23 +53,32 @@
 }
 
 .edit-product-card input,
-.edit-product-card textarea {
+.edit-product-card textarea,
+.edit-product-card select {
   width: 100%;
   padding: 16px;
   border-radius: 14px;
   border: 1.5px solid var(--border);
   outline: none;
-  background: rgba(255, 255, 255, 0.03);
+  background: var(--bg);
   color: var(--text);
   font-size: 15px;
   transition: all 0.3s ease;
+  font-family: inherit;
 }
 
 .edit-product-card input:focus,
-.edit-product-card textarea:focus {
+.edit-product-card textarea:focus,
+.edit-product-card select:focus {
   border-color: var(--btn);
   box-shadow: 0 0 0 4px rgba(108, 92, 231, 0.15);
-  background: rgba(255, 255, 255, 0.06);
+  background: var(--bg);
+}
+
+.edit-product-card select option {
+  background: var(--bg-right);
+  color: var(--text);
+  padding: 10px;
 }
 
 .edit-product-card textarea {
