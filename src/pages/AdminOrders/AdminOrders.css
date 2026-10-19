@@ -373,6 +373,26 @@
   font-weight: 600;
 }
 
+.admin-order-item-options {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 5px;
+  margin: 2px 0;
+}
+
+.admin-option-tag {
+  font-size: 11px;
+  background: rgba(108, 92, 231, 0.12);
+  color: var(--btn);
+  padding: 2px 7px;
+  border-radius: 6px;
+  border: 1px solid rgba(108, 92, 231, 0.25);
+}
+
+.admin-option-tag strong {
+  color: var(--text);
+}
+
 .modal-item-discount {
   font-size: 11px;
   color: #f59e0b;

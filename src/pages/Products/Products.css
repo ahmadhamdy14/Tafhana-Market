@@ -50,6 +50,52 @@
   font-size: 16px;
 }
 
+/* 🧭 Breadcrumb for subcategory navigation */
+.products-breadcrumb {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  max-width: 1200px;
+  margin: 0 auto 20px auto;
+  padding: 12px 20px;
+  background: var(--bg-right);
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  font-size: 14px;
+  font-weight: 600;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.03);
+  direction: rtl;
+}
+
+.products-breadcrumb a {
+  color: var(--sub);
+  text-decoration: none;
+  transition: color 0.2s ease;
+}
+
+.products-breadcrumb a:hover {
+  color: #10b981;
+}
+
+.products-bc-sep {
+  color: var(--border);
+  font-size: 13px;
+}
+
+.products-bc-current {
+  color: #10b981;
+  font-weight: 700;
+}
+
+@media (max-width: 600px) {
+  .products-breadcrumb {
+    padding: 10px 14px;
+    font-size: 12px;
+    border-radius: 10px;
+    margin-bottom: 14px;
+  }
+}
+
 /* 🌟 Category Hero Header */
 .category-hero-header {
   background: linear-gradient(135deg, rgba(139, 92, 246, 0.12) 0%, rgba(16, 185, 129, 0.05) 100%);

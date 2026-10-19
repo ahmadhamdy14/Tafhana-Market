@@ -55,7 +55,7 @@ const Cart = () => {
     msg += `👤 الاسم: ${form.firstName} ${form.lastName}\n`;
     msg += `📞 الهاتف: ${form.phone}\n`;
     if (form.shopName && form.shopName.trim()) {
-      msg += `🏪 اسم المحل: ${form.shopName.trim()}\n`;
+      msg += `🏪 : ${form.shopName.trim()}\n`;
     }
     msg += `📍 العنوان: ${form.address}\n`;
     if (form.notes && form.notes.trim()) {
@@ -67,7 +67,22 @@ const Cart = () => {
 
     items.forEach((item, i) => {
       msg += `\n${i + 1}. ${item.name}\n`;
+      if (item.selectedOptions && Object.keys(item.selectedOptions).length > 0) {
+        const optsText = Object.entries(item.selectedOptions)
+          .map(([g, v]) => {
+            const grp = Array.isArray(item.options) ? item.options.find((o) => o.name === g) : null;
+            const choiceObj = grp?.choices?.find(
+              (c) => (typeof c === "object" && c !== null ? c.name : c) === v
+            );
+            const extra = Number(choiceObj?.price) || 0;
+            return extra > 0 ? `${g}: ${v} (+${extra} ج)` : `${g}: ${v}`;
+          })
+          .join(" | ");
+        msg += `   الخيارات: (${optsText})\n`;
+      }
       msg += `   الكمية: ${item.qty}\n`;
+      const itemFinalPrice = item.price - (item.price * (item.discount || 0)) / 100;
+      msg += `   السعر: ${(itemFinalPrice * item.qty).toFixed(0)} جنيه\n`;
     });
 
     msg += `━━━━━━━━━━━━━━━\n`;
@@ -84,11 +99,14 @@ const Cart = () => {
     try {
       const items = cart.map((item) => ({
         id: item.id,
+        cartItemId: item.cartItemId || item.id,
         name: item.name,
         qty: item.qty,
         price: item.price,
         discount: item.discount || 0,
         image: item.image,
+        selectedOptions: item.selectedOptions || {},
+        options: item.options || [],
       }));
 
       const orderId = await createOrder({
@@ -142,16 +160,46 @@ const Cart = () => {
             {cart.map((item) => {
               const finalPrice =
                 item.price - (item.price * (item.discount || 0)) / 100;
+              const itemIdentifier = item.cartItemId || item.id;
+              const hasSelectedOptions =
+                item.selectedOptions &&
+                typeof item.selectedOptions === "object" &&
+                Object.keys(item.selectedOptions).length > 0;
+
               return (
-                <div className="cart-card" key={item.id}>
+                <div className="cart-card" key={itemIdentifier}>
                   <img src={item.image} alt={item.name} />
 
                   <div className="cart-info">
                     <h3>{item.name}</h3>
+
+                    {/* 🏷️ Selected Options Badges */}
+                    {hasSelectedOptions && (
+                      <div className="cart-item-options">
+                        {Object.entries(item.selectedOptions).map(([group, val]) => {
+                          const grp = Array.isArray(item.options) ? item.options.find((o) => o.name === group) : null;
+                          const choiceObj = grp?.choices?.find(
+                            (c) => (typeof c === "object" && c !== null ? c.name : c) === val
+                          );
+                          const extra = Number(choiceObj?.price) || 0;
+
+                          return (
+                            <span key={group} className="cart-option-badge">
+                              <span className="cart-option-group-label">{group}:</span>
+                              <strong className="cart-option-val">{val}</strong>
+                              {extra > 0 && (
+                                <span className="cart-option-extra-pill">(+{extra} ج)</span>
+                              )}
+                            </span>
+                          );
+                        })}
+                      </div>
+                    )}
+
                     <p>{finalPrice.toFixed(0)} EGP</p>
 
                     <div className="qty-box">
-                      <button onClick={() => decreaseQty(item.id)}>-</button>
+                      <button onClick={() => decreaseQty(itemIdentifier)}>-</button>
                       <span>{item.qty}</span>
                       <button onClick={() => addToCart(item)}>+</button>
                     </div>
@@ -159,7 +207,7 @@ const Cart = () => {
 
                   <button
                     className="remove-btn"
-                    onClick={() => removeFromCart(item.id)}
+                    onClick={() => removeFromCart(itemIdentifier)}
                   >
                     ✖
                   </button>
@@ -287,7 +335,7 @@ const Cart = () => {
                 <input
                   type="text"
                   name="shopName"
-                  placeholder="اسم المحل (اختياري) 🏪"
+                  placeholder=" لو عايز تشتري من محل معين اكتبه هنا 🏪"
                   value={form.shopName}
                   onChange={handleChange}
                 />

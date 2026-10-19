@@ -130,6 +130,22 @@
   font-weight: 600;
 }
 
+.my-order-item-options {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 5px;
+  margin: 2px 0;
+}
+
+.my-order-option-badge {
+  font-size: 11px;
+  background: rgba(108, 92, 231, 0.1);
+  color: var(--btn);
+  padding: 2px 7px;
+  border-radius: 6px;
+  border: 1px solid rgba(108, 92, 231, 0.25);
+}
+
 .my-order-item-qty {
   font-size: 12px;
   opacity: 0.5;

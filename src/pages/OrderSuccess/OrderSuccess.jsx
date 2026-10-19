@@ -115,13 +115,40 @@ const OrderSuccess = () => {
         {/* 📦 Items */}
         <div className="success-items">
           <h3>🛎️ المنتجات</h3>
-          {order.items.map((item) => {
+          {order.items?.map((item, idx) => {
             const finalPrice = item.price - (item.price * (item.discount || 0)) / 100;
+            const itemKey = item.cartItemId || `${item.id}-${idx}`;
+            const hasOptions =
+              item.selectedOptions &&
+              typeof item.selectedOptions === "object" &&
+              Object.keys(item.selectedOptions).length > 0;
+
             return (
-              <div className="success-item" key={item.id}>
+              <div className="success-item" key={itemKey}>
                 <img src={item.image} alt={item.name} />
                 <div className="success-item-info">
                   <span className="success-item-name">{item.name}</span>
+                  {hasOptions && (
+                    <div className="success-item-options">
+                      {Object.entries(item.selectedOptions).map(([g, v]) => {
+                        const grp = Array.isArray(item.options) ? item.options.find((o) => o.name === g) : null;
+                        const choiceObj = grp?.choices?.find(
+                          (c) => (typeof c === "object" && c !== null ? c.name : c) === v
+                        );
+                        const extra = Number(choiceObj?.price) || 0;
+                        return (
+                          <span key={g} className="success-option-badge">
+                            {g}: <strong>{v}</strong>
+                            {extra > 0 && (
+                              <small style={{ marginRight: "4px", color: "#10b981", fontWeight: "700" }}>
+                                (+{extra} ج)
+                              </small>
+                            )}
+                          </span>
+                        );
+                      })}
+                    </div>
+                  )}
                   <span className="success-item-qty">x{item.qty}</span>
                 </div>
                 <span className="success-item-price">

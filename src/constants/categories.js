@@ -106,6 +106,123 @@ export const CATEGORIES = [
 export const OFFICIAL_CATEGORY_NAMES = CATEGORIES.map((c) => c.name);
 
 /**
+ * 🧺 Grocery Subcategories (under بقالة / bakala)
+ * Each subcategory has a unique slug, Arabic name, icon, and accent color
+ * that follows the same design conventions as the main CATEGORIES.
+ */
+export const GROCERY_SUBCATEGORIES = [
+  {
+    id: "rice-pasta-grains",
+    slug: "rice-pasta-grains",
+    name: "الأرز والمكرونة والحبوب",
+    nameEn: "Rice, Pasta & Grains",
+    tagline: "أساسيات المطبخ من الأرز والمكرونة والحبوب المتنوعة",
+    description: "تشكيلة واسعة من أنواع الأرز البسمتي والمصري، المكرونة بأشكالها، العدس، الفول، والحبوب الكاملة لوجبات شهية كل يوم.",
+    icon: "🍚",
+    accentColor: "#f59e0b",
+    themeGradient: "linear-gradient(135deg, rgba(245, 158, 11, 0.15) 0%, rgba(217, 119, 6, 0.05) 100%)",
+    borderHover: "#f59e0b",
+    parentCategory: "بقالة",
+  },
+  {
+    id: "hot-drinks",
+    slug: "hot-drinks",
+    name: "المشروبات الساخنة",
+    nameEn: "Hot Drinks",
+    tagline: "شاي وقهوة ومشروبات ساخنة متنوعة",
+    description: "أجود أنواع الشاي، القهوة التركية والعربية، النسكافيه، الكاكاو، والأعشاب الطبيعية لكل الأوقات.",
+    icon: "☕",
+    accentColor: "#92400e",
+    themeGradient: "linear-gradient(135deg, rgba(146, 64, 14, 0.15) 0%, rgba(120, 53, 15, 0.05) 100%)",
+    borderHover: "#92400e",
+    parentCategory: "بقالة",
+  },
+  {
+    id: "dairy",
+    slug: "dairy",
+    name: "الألبان ومنتجاتها",
+    nameEn: "Dairy Products",
+    tagline: "ألبان طازجة وأجبان ومنتجات يومية",
+    description: "حليب طازج، زبادي، أجبان بيضاء ومطبوخة، قشطة، زبدة، وجميع منتجات الألبان الطازجة يومياً.",
+    icon: "🥛",
+    accentColor: "#0ea5e9",
+    themeGradient: "linear-gradient(135deg, rgba(14, 165, 233, 0.15) 0%, rgba(2, 132, 199, 0.05) 100%)",
+    borderHover: "#0ea5e9",
+    parentCategory: "بقالة",
+  },
+  {
+    id: "chips-sweets-biscuits",
+    slug: "chips-sweets-biscuits",
+    name: "الشيبسي والحلويات والبسكويت",
+    nameEn: "Chips, Sweets & Biscuits",
+    tagline: "شيبسي وبسكويت وحلويات لذيذة للتسلية",
+    description: "أشهر ماركات الشيبسي والبسكويت، الشوكولاتة، الحلويات، والسناكس المفضلة للكبار والصغار.",
+    icon: "🍪",
+    accentColor: "#e11d48",
+    themeGradient: "linear-gradient(135deg, rgba(225, 29, 72, 0.15) 0%, rgba(190, 18, 60, 0.05) 100%)",
+    borderHover: "#e11d48",
+    parentCategory: "بقالة",
+  },
+  {
+    id: "canned-sauces",
+    slug: "canned-sauces",
+    name: "المعلبات والصلصات",
+    nameEn: "Canned Goods & Sauces",
+    tagline: "معلبات وصلصات جاهزة لوجبات سريعة ولذيذة",
+    description: "تونة، فول مدمس، ذرة، صلصة طماطم، كاتشب، مايونيز، وجميع المعلبات والصلصات لمطبخك.",
+    icon: "🥫",
+    accentColor: "#dc2626",
+    themeGradient: "linear-gradient(135deg, rgba(220, 38, 38, 0.15) 0%, rgba(185, 28, 28, 0.05) 100%)",
+    borderHover: "#dc2626",
+    parentCategory: "بقالة",
+  },
+  {
+    id: "spices-oils",
+    slug: "spices-oils",
+    name: "التوابل والزيوت والإضافات",
+    nameEn: "Spices, Oils & Additives",
+    tagline: "توابل وبهارات وزيوت لنكهة مميزة",
+    description: "بهارات وتوابل متنوعة، زيت ذرة وعباد الشمس وزيتون، خل، ملح، وكل الإضافات التي تكمل وصفاتك.",
+    icon: "🫒",
+    accentColor: "#65a30d",
+    themeGradient: "linear-gradient(135deg, rgba(101, 163, 13, 0.15) 0%, rgba(77, 124, 15, 0.05) 100%)",
+    borderHover: "#65a30d",
+    parentCategory: "بقالة",
+  },
+  {
+    id: "sugar-flour-baking",
+    slug: "sugar-flour-baking",
+    name: "السكر والدقيق ومستلزمات الحلويات",
+    nameEn: "Sugar, Flour & Baking",
+    tagline: "سكر ودقيق ومستلزمات الخبز والحلويات",
+    description: "سكر أبيض وبني، دقيق فاخر ومخصوص، نشا، بيكنج بودر، فانيليا، وكل مستلزمات تحضير الحلويات والمخبوزات.",
+    icon: "🧁",
+    accentColor: "#d946ef",
+    themeGradient: "linear-gradient(135deg, rgba(217, 70, 239, 0.15) 0%, rgba(192, 38, 211, 0.05) 100%)",
+    borderHover: "#d946ef",
+    parentCategory: "بقالة",
+  },
+  {
+    id: "juices-water-drinks",
+    slug: "juices-water-drinks",
+    name: "العصائر والمياه والمشروبات",
+    nameEn: "Juices, Water & Beverages",
+    tagline: "عصائر ومياه ومشروبات باردة منعشة",
+    description: "عصائر طبيعية ومركزة، مياه معدنية، مشروبات غازية، طاقة، ومشروبات باردة متنوعة لكل المناسبات.",
+    icon: "🧃",
+    accentColor: "#0891b2",
+    themeGradient: "linear-gradient(135deg, rgba(8, 145, 178, 0.15) 0%, rgba(6, 116, 143, 0.05) 100%)",
+    borderHover: "#0891b2",
+    parentCategory: "بقالة",
+  },
+];
+
+/**
+ * All grocery subcategory names (for validation in AddProduct/EditProduct)
+ */
+export const GROCERY_SUBCATEGORY_NAMES = GROCERY_SUBCATEGORIES.map((s) => s.name);
+
+/**
  * Find category by slug (or fallback to matching by Arabic name)
  */
 export const getCategoryBySlug = (slug) => {
@@ -122,6 +239,31 @@ export const getCategoryBySlug = (slug) => {
         c.nameEn.toLowerCase() === decoded
     ) || null
   );
+};
+
+/**
+ * Find a grocery subcategory by its slug
+ */
+export const getSubcategoryBySlug = (slug) => {
+  if (!slug) return null;
+  const decoded = decodeURIComponent(slug).toLowerCase().trim();
+  return (
+    GROCERY_SUBCATEGORIES.find(
+      (s) =>
+        s.slug.toLowerCase() === decoded ||
+        s.name.toLowerCase() === decoded ||
+        s.nameEn.toLowerCase() === decoded
+    ) || null
+  );
+};
+
+/**
+ * Find a grocery subcategory by its exact Arabic name
+ */
+export const getSubcategoryByName = (name) => {
+  if (!name) return null;
+  const trimmed = name.trim();
+  return GROCERY_SUBCATEGORIES.find((s) => s.name === trimmed) || null;
 };
 
 /**

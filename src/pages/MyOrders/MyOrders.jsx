@@ -105,18 +105,49 @@ const MyOrders = () => {
 
               {/* 📦 Items */}
               <div className="my-order-items">
-                {order.items?.map((item) => (
-                  <div className="my-order-item" key={item.id}>
-                    <img src={item.image} alt={item.name} />
-                    <div className="my-order-item-info">
-                      <span className="my-order-item-name">{item.name}</span>
-                      <span className="my-order-item-qty">x{item.qty}</span>
+                {order.items?.map((item, idx) => {
+                  const finalPrice =
+                    (item.price - (item.price * (item.discount || 0)) / 100) * item.qty;
+                  const itemKey = item.cartItemId || `${item.id}-${idx}`;
+                  const hasOptions =
+                    item.selectedOptions &&
+                    typeof item.selectedOptions === "object" &&
+                    Object.keys(item.selectedOptions).length > 0;
+
+                  return (
+                    <div className="my-order-item" key={itemKey}>
+                      <img src={item.image} alt={item.name} />
+                      <div className="my-order-item-info">
+                        <span className="my-order-item-name">{item.name}</span>
+                        {hasOptions && (
+                          <div className="my-order-item-options">
+                            {Object.entries(item.selectedOptions).map(([g, v]) => {
+                              const grp = Array.isArray(item.options) ? item.options.find((o) => o.name === g) : null;
+                              const choiceObj = grp?.choices?.find(
+                                (c) => (typeof c === "object" && c !== null ? c.name : c) === v
+                              );
+                              const extra = Number(choiceObj?.price) || 0;
+                              return (
+                                <span key={g} className="my-order-option-badge">
+                                  {g}: <strong>{v}</strong>
+                                  {extra > 0 && (
+                                    <small style={{ marginRight: "4px", color: "#10b981", fontWeight: "700" }}>
+                                      (+{extra} ج)
+                                    </small>
+                                  )}
+                                </span>
+                              );
+                            })}
+                          </div>
+                        )}
+                        <span className="my-order-item-qty">x{item.qty}</span>
+                      </div>
+                      <span className="my-order-item-price">
+                        {finalPrice.toFixed(0)} EGP
+                      </span>
                     </div>
-                    <span className="my-order-item-price">
-                      {((item.price - (item.price * (item.discount || 0)) / 100) * item.qty).toFixed(0)} EGP
-                    </span>
-                  </div>
-                ))}
+                  );
+                })}
               </div>
 
               {/* 💰 Total */}

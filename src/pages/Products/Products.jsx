@@ -6,15 +6,27 @@ import { FavoritesContext } from "../../context/FavoritesContext";
 import { deleteProduct } from "../../services/productService";
 import { useProductsPagination } from "../../hooks/useProductsPagination";
 import { useProductsSearch } from "../../hooks/useProductsSearch";
-import { CATEGORIES, getCategoryBySlug } from "../../constants/categories";
+import { CATEGORIES, getCategoryBySlug, getSubcategoryBySlug } from "../../constants/categories";
+import ProductCard from "../../components/ProductCard/ProductCard";
 import "./Products.css";
 
 const WHATSAPP_NUMBER = "201104152249";
 
 const Products = () => {
-  const { categorySlug } = useParams();
-  const currentCategory = categorySlug ? getCategoryBySlug(categorySlug) : null;
+  const { categorySlug, subcategorySlug } = useParams();
+
+  // Determine if we're viewing a grocery subcategory
+  const currentSubcategory = subcategorySlug ? getSubcategoryBySlug(subcategorySlug) : null;
+
+  // When viewing a subcategory, the parent category is always "بقالة"
+  const currentCategory = currentSubcategory
+    ? getCategoryBySlug("bakala")
+    : categorySlug
+      ? getCategoryBySlug(categorySlug)
+      : null;
+
   const categoryFilter = currentCategory ? currentCategory.name : null;
+  const subcategoryFilter = currentSubcategory ? currentSubcategory.name : null;
 
   const {
     products: normalProducts,
@@ -105,20 +117,46 @@ const Products = () => {
     setSelectedId(null);
   };
 
+  // Build the back navigation path
+  const backLink = currentSubcategory ? "/store/bakala" : "/store";
+  const backLabel = currentSubcategory ? "الرجوع إلى أقسام البقالة" : "الرجوع إلى أقسام المتجر";
+
   return (
     <div className="products">
       {/* 🧭 Navigation Header */}
       <div className="products-top-navigation">
-        <Link to="/store" className="back-to-store-btn">
-          <span>←</span> الرجوع إلى أقسام المتجر
+        <Link to={backLink} className="back-to-store-btn">
+          <span>←</span> {backLabel}
         </Link>
         <Link to="/medical" className="go-to-medical-btn">
           الخدمات الطبية 🩺
         </Link>
       </div>
 
+      {/* 🧭 Breadcrumb for subcategory */}
+      {currentSubcategory && (
+        <nav className="products-breadcrumb">
+          <Link to="/">الرئيسية</Link>
+          <span className="products-bc-sep">/</span>
+          <Link to="/store">المتجر</Link>
+          <span className="products-bc-sep">/</span>
+          <Link to="/store/bakala">بقالة</Link>
+          <span className="products-bc-sep">/</span>
+          <span className="products-bc-current">{currentSubcategory.name}</span>
+        </nav>
+      )}
+
       <div className="products-header-container">
-        {currentCategory ? (
+        {currentSubcategory ? (
+          <div className="category-hero-header" style={{ "--cat-accent": currentSubcategory.accentColor }}>
+            <div className="category-title-badge">
+              <span className="cat-icon-lg">{currentSubcategory.icon}</span>
+              <h1>{currentSubcategory.name}</h1>
+              <span className="cat-en-sub">{currentSubcategory.nameEn}</span>
+            </div>
+            <p className="category-header-desc">{currentSubcategory.description}</p>
+          </div>
+        ) : currentCategory ? (
           <div className="category-hero-header" style={{ "--cat-accent": currentCategory.accentColor }}>
             <div className="category-title-badge">
               <span className="cat-icon-lg">{currentCategory.icon}</span>
@@ -135,37 +173,41 @@ const Products = () => {
         )}
       </div>
 
-      {/* 🏷️ Quick Category Pills Switcher */}
-      <div className="categories-filter">
-        <Link
-          to="/products"
-          className={`category-btn ${!categoryFilter ? "active" : ""}`}
-        >
-          🌟 الكل
-        </Link>
-        {CATEGORIES.map((cat) => {
-          const isActive = categoryFilter === cat.name;
-          return (
-            <Link
-              key={cat.id}
-              to={`/store/${cat.slug}`}
-              className={`category-btn ${isActive ? "active" : ""}`}
-              style={isActive ? { backgroundColor: cat.accentColor, borderColor: cat.accentColor } : {}}
-            >
-              <span>{cat.icon}</span> {cat.name}
-            </Link>
-          );
-        })}
-      </div>
+      {/* 🏷️ Quick Category Pills Switcher — hide when viewing subcategory */}
+      {!currentSubcategory && (
+        <div className="categories-filter">
+          <Link
+            to="/products"
+            className={`category-btn ${!categoryFilter ? "active" : ""}`}
+          >
+            🌟 الكل
+          </Link>
+          {CATEGORIES.map((cat) => {
+            const isActive = categoryFilter === cat.name;
+            return (
+              <Link
+                key={cat.id}
+                to={`/store/${cat.slug}`}
+                className={`category-btn ${isActive ? "active" : ""}`}
+                style={isActive ? { backgroundColor: cat.accentColor, borderColor: cat.accentColor } : {}}
+              >
+                <span>{cat.icon}</span> {cat.name}
+              </Link>
+            );
+          })}
+        </div>
+      )}
 
       {/* 🔍 Search Input */}
       <div className="search-box">
         <input
           type="text"
           placeholder={
-            currentCategory
-              ? `ابحث داخل قسم ${currentCategory.name}...`
-              : "ابحث عن أي منتج..."
+            currentSubcategory
+              ? `ابحث داخل ${currentSubcategory.name}...`
+              : currentCategory
+                ? `ابحث داخل قسم ${currentCategory.name}...`
+                : "ابحث عن أي منتج..."
           }
           value={search}
           onChange={(e) => setSearch(e.target.value)}
@@ -177,120 +219,47 @@ const Products = () => {
         const filteredProducts = products.filter((p) => {
           const matchSearch =
             p.name.toLowerCase().includes(search.toLowerCase()) ||
-            p.description?.toLowerCase().includes(search.toLowerCase());
+            p.description?.toLowerCase().includes(search.toLowerCase()) ||
+            (Array.isArray(p.options) &&
+              p.options.some(
+                (opt) =>
+                  opt?.name?.toLowerCase().includes(search.toLowerCase()) ||
+                  (Array.isArray(opt?.choices) &&
+                    opt.choices.some((c) => {
+                      const text = typeof c === "object" && c !== null ? c.name : String(c);
+                      return String(text).toLowerCase().includes(search.toLowerCase());
+                    }))
+              ));
           const matchCategory = !categoryFilter || p.category === categoryFilter;
-          return matchSearch && matchCategory;
+
+          // Subcategory filtering: if viewing a subcategory, only show products matching it
+          const matchSubcategory = !subcategoryFilter || p.subcategory === subcategoryFilter;
+
+          return matchSearch && matchCategory && matchSubcategory;
         });
 
         return (
           <>
             <div className="products-grid">
-              {filteredProducts.map((product) => {
-                const cartItem = cart.find((c) => c.id === product.id);
-
-                // 💰 Calculation of discounted price
-                const finalPrice =
-                  product.price -
-                  (product.price * (product.discount || 0)) / 100;
-
-                return (
-                  <div className="card" key={product.id}>
-                    {/* Heart Icon Toggle */}
-                    <button
-                      className="heart-btn"
-                      onClick={() => toggleFavorite(product)}
-                      aria-label="إضافة للمفضلة"
-                    >
-                      {isFavorite(product.id) ? "❤️" : "🤍"}
-                    </button>
-
-                    <img src={product.image} alt={product.name} loading="lazy" />
-                    <div className="card-body">
-                      <span className="category-badge">
-                        {product.category || "غير مصنف"}
-                      </span>
-                      <div
-                        style={{
-                          display: "flex",
-                          justifyContent: "space-between",
-                          alignItems: "center",
-                        }}
-                      >
-                        <h3>{product.name}</h3>
-                        {product.discount > 0 && (
-                          <span className="badge">
-                            خصم {product.discount}%
-                          </span>
-                        )}
-                      </div>
-                      <p>{product.description}</p>
-                      
-                      {/* 💰 PRICE BOX */}
-                      <div className="price-box">
-                        {product.discount > 0 && (
-                          <span className="old-price">
-                            {product.price} جنيه
-                          </span>
-                        )}
-                        <div>
-                          <span className="new-price">
-                            {finalPrice.toFixed(0)} جنيه
-                          </span>
-                        </div>
-                      </div>
-
-                      {/* 🛒 ADD / QTY BOX */}
-                      {cartItem ? (
-                        <div className="qty-box">
-                          <button onClick={() => decreaseQty(product.id)}>-</button>
-                          <span>{cartItem.qty}</span>
-                          <button onClick={() => addToCart(product)}>+</button>
-                        </div>
-                      ) : (
-                        <button
-                          className={`add-btn ${
-                            clickedId === product.id ? "added" : ""
-                          }`}
-                          onClick={() => {
-                            addToCart(product);
-                            setClickedId(product.id);
-                            setTimeout(() => setClickedId(null), 1000);
-                          }}
-                        >
-                          {clickedId === product.id
-                            ? "✔ تمت الإضافة!"
-                            : "إضافة للسلة"}
-                        </button>
-                      )}
-
-                      {/* ❌ DELETE & EDIT (Admin only) */}
-                      {userData?.role === "admin" && (
-                        <div className="admin-actions">
-                          <Link
-                            to={`/edit-product/${product.id}`}
-                            className="edit-btn"
-                          >
-                            ✏️ تعديل
-                          </Link>
-                          <button
-                            className="delete-btn"
-                            onClick={() => handleDeleteClick(product.id)}
-                          >
-                            🗑️ حذف
-                          </button>
-                        </div>
-                      )}
-                    </div>
-                  </div>
-                );
-              })}
+              {filteredProducts.map((product) => (
+                <ProductCard
+                  key={product.id}
+                  product={product}
+                  isAdmin={userData?.role === "admin"}
+                  onDeleteClick={handleDeleteClick}
+                />
+              ))}
 
               {/* ➕ Add Product (Admin Only) */}
               {userData?.role === "admin" && (
                 <Link
                   to={`/add-product${
                     categoryFilter
-                      ? `?category=${encodeURIComponent(categoryFilter)}`
+                      ? `?category=${encodeURIComponent(categoryFilter)}${
+                          subcategoryFilter
+                            ? `&subcategory=${encodeURIComponent(subcategoryFilter)}`
+                            : ""
+                        }`
                       : ""
                   }`}
                   className="card add-card"
@@ -299,7 +268,11 @@ const Products = () => {
                     <span className="plus">+</span>
                     <h3>
                       إضافة منتج
-                      {categoryFilter ? ` في قسم ${categoryFilter}` : ""}
+                      {subcategoryFilter
+                        ? ` في ${subcategoryFilter}`
+                        : categoryFilter
+                          ? ` في قسم ${categoryFilter}`
+                          : ""}
                     </h3>
                   </div>
                 </Link>
@@ -310,7 +283,7 @@ const Products = () => {
             {filteredProducts.length === 0 && !loading && (
               <div className="search-empty-state">
                 <div className="search-empty-icon">
-                  {currentCategory ? currentCategory.icon : "🛒"}
+                  {currentSubcategory ? currentSubcategory.icon : currentCategory ? currentCategory.icon : "🛒"}
                 </div>
                 <h3 className="search-empty-title">
                   {isSearchActive && search.trim()
@@ -324,7 +297,7 @@ const Products = () => {
                   href={`https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent(
                     search.trim()
                       ? `مرحبا، أبحث عن المنتج "${search}" في تفهنا ماركت هل هو متوفر؟`
-                      : `مرحبا، أود الاستفسار عن منتجات قسم ${categoryFilter || "المتجر"}`
+                      : `مرحبا، أود الاستفسار عن منتجات قسم ${subcategoryFilter || categoryFilter || "المتجر"}`
                   )}`}
                   target="_blank"
                   rel="noopener noreferrer"

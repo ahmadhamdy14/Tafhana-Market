@@ -7,6 +7,7 @@ import AdminRoute from "./AdminRoute";
 import Admin from "../pages/Admin/Admin";
 import Products from "../pages/Products/Products";
 import StoreCategories from "../pages/StoreCategories/StoreCategories";
+import GrocerySubcategories from "../pages/GrocerySubcategories/GrocerySubcategories";
 import AddProduct from "../pages/AddProduct/AddProduct";
 import EditProduct from "../pages/EditProduct/EditProduct";
 import Cart from "../pages/Cart/Cart";
@@ -27,6 +28,8 @@ const AppRoutes = () => {
           {/* 🌐 Public Routes */}
           <Route path="/" element={<Home />} />
           <Route path="/store" element={<StoreCategories />} />
+          <Route path="/store/bakala" element={<GrocerySubcategories />} />
+          <Route path="/store/bakala/:subcategorySlug" element={<Products />} />
           <Route path="/store/:categorySlug" element={<Products />} />
           <Route path="/products" element={<Products />} />
           <Route path="/medical" element={<MedicalServices />} />

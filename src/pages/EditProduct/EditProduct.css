@@ -86,7 +86,8 @@
   min-height: 100px;
 }
 
-.edit-product-card button {
+.edit-product-card button[type="submit"],
+.edit-product-card .submit-btn {
   width: 100%;
   padding: 16px;
   border: none;
@@ -101,12 +102,14 @@
   box-shadow: 0 4px 15px rgba(108, 92, 231, 0.3);
 }
 
-.edit-product-card button:hover {
+.edit-product-card button[type="submit"]:hover,
+.edit-product-card .submit-btn:hover {
   transform: translateY(-2px);
   box-shadow: 0 6px 20px rgba(108, 92, 231, 0.4);
 }
 
-.edit-product-card button:disabled {
+.edit-product-card button[type="submit"]:disabled,
+.edit-product-card .submit-btn:disabled {
   background: var(--border);
   cursor: not-allowed;
   box-shadow: none;

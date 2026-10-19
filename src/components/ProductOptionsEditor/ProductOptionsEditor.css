@@ -1,0 +1,511 @@
+.product-options-editor {
+  margin: 15px 0;
+  border: 1.5px dashed var(--border);
+  border-radius: 16px;
+  background: rgba(108, 92, 231, 0.03);
+  padding: 16px;
+  transition: all 0.3s ease;
+}
+
+.poe-toggle-bar {
+  display: flex;
+  align-items: center;
+}
+
+.poe-toggle-label {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  cursor: pointer;
+  user-select: none;
+  width: 100%;
+}
+
+.poe-toggle-checkbox {
+  position: absolute;
+  opacity: 0;
+  width: 0;
+  height: 0;
+}
+
+.poe-toggle-custom {
+  width: 44px;
+  height: 24px;
+  background: var(--border);
+  border-radius: 20px;
+  position: relative;
+  transition: background 0.25s ease;
+  flex-shrink: 0;
+}
+
+.poe-toggle-custom::after {
+  content: "";
+  position: absolute;
+  top: 3px;
+  right: 3px;
+  width: 18px;
+  height: 18px;
+  background: #ffffff;
+  border-radius: 50%;
+  transition: transform 0.25s ease;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+}
+
+.poe-toggle-checkbox:checked + .poe-toggle-custom {
+  background: var(--btn);
+}
+
+.poe-toggle-checkbox:checked + .poe-toggle-custom::after {
+  transform: translateX(-20px);
+}
+
+.poe-toggle-text {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  text-align: right;
+}
+
+.poe-toggle-text strong {
+  font-size: 15px;
+  color: var(--text);
+}
+
+.poe-toggle-sub {
+  font-size: 12px;
+  color: var(--sub);
+  line-height: 1.4;
+}
+
+/* 📂 BODY */
+.poe-body {
+  margin-top: 16px;
+  padding-top: 16px;
+  border-top: 1px solid var(--border);
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+/* ⚡ PRESETS */
+.poe-presets-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+  padding: 8px 12px;
+  background: var(--bg);
+  border-radius: 12px;
+  border: 1px solid var(--border);
+}
+
+.poe-presets-title {
+  font-size: 13px;
+  color: var(--sub);
+  font-weight: 600;
+}
+
+.poe-preset-btn {
+  background: rgba(108, 92, 231, 0.1);
+  color: var(--btn);
+  border: 1px solid rgba(108, 92, 231, 0.3);
+  padding: 5px 10px;
+  border-radius: 8px;
+  font-size: 12px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.poe-preset-btn:hover {
+  background: var(--btn);
+  color: #ffffff;
+  transform: translateY(-1px);
+}
+
+/* 📭 EMPTY STATE */
+.poe-empty-state {
+  text-align: center;
+  padding: 24px 16px;
+  background: var(--bg);
+  border-radius: 12px;
+  border: 1px dashed var(--border);
+  color: var(--sub);
+  font-size: 14px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+}
+
+/* 📦 GROUP CARD */
+.poe-groups-list {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.poe-group-card {
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  padding: 16px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+}
+
+.poe-group-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 12px;
+  padding-bottom: 8px;
+  border-bottom: 1px solid var(--border);
+}
+
+.poe-group-badge {
+  font-weight: 700;
+  font-size: 14px;
+  color: var(--btn);
+  background: rgba(108, 92, 231, 0.1);
+  padding: 4px 10px;
+  border-radius: 8px;
+}
+
+.poe-delete-group-btn {
+  background: rgba(239, 68, 68, 0.1);
+  color: #ef4444;
+  border: 1px solid rgba(239, 68, 68, 0.25);
+  padding: 5px 10px;
+  border-radius: 8px;
+  font-size: 12px;
+  cursor: pointer;
+  font-weight: 600;
+  transition: all 0.2s ease;
+}
+
+.poe-delete-group-btn:hover {
+  background: #ef4444;
+  color: #ffffff;
+}
+
+.poe-group-inputs {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin-bottom: 16px;
+}
+
+.poe-input-field {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  width: 100%;
+}
+
+.poe-field-label,
+.poe-input-field label {
+  display: block;
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--text);
+  margin-bottom: 2px;
+  text-align: right;
+}
+
+.poe-group-name-input,
+.poe-input-field input[type="text"] {
+  width: 100% !important;
+  box-sizing: border-box !important;
+  padding: 14px 16px !important;
+  border-radius: 12px !important;
+  border: 2px solid var(--border) !important;
+  background: var(--bg-right) !important;
+  color: var(--text) !important;
+  font-size: 15px !important;
+  font-weight: 600 !important;
+  outline: none !important;
+  font-family: inherit !important;
+  transition: all 0.25s ease !important;
+}
+
+.poe-group-name-input:focus,
+.poe-input-field input[type="text"]:focus {
+  border-color: var(--btn) !important;
+  box-shadow: 0 0 0 4px rgba(108, 92, 231, 0.2) !important;
+  background: var(--bg-right) !important;
+}
+
+.poe-group-name-input::placeholder,
+.poe-input-field input[type="text"]::placeholder {
+  color: var(--sub) !important;
+  opacity: 0.75 !important;
+  font-size: 14px !important;
+  font-weight: 400 !important;
+}
+
+.poe-required-toggle {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 13px;
+  color: var(--text);
+  cursor: pointer;
+  user-select: none;
+}
+
+.poe-required-toggle input[type="checkbox"] {
+  width: 18px !important;
+  height: 18px !important;
+  accent-color: var(--btn);
+  cursor: pointer;
+}
+
+/* 🍬 CHOICES */
+.poe-choices-section {
+  background: var(--bg-right);
+  border-radius: 12px;
+  padding: 14px;
+  border: 1px solid var(--border);
+}
+
+.poe-choices-header {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  margin-bottom: 12px;
+  text-align: right;
+}
+
+.poe-choices-label {
+  display: block;
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--text);
+  margin-bottom: 0;
+}
+
+.poe-choices-help {
+  font-size: 11.5px;
+  color: var(--sub);
+  line-height: 1.4;
+}
+
+.poe-choices-list {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin-bottom: 12px;
+}
+
+.poe-choice-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  width: 100%;
+}
+
+.poe-choice-num {
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--btn);
+  min-width: 20px;
+  text-align: center;
+}
+
+.poe-choice-name-wrapper {
+  flex: 1;
+  min-width: 0;
+}
+
+.poe-choice-name-input {
+  width: 100% !important;
+  box-sizing: border-box !important;
+  padding: 11px 14px !important;
+  border-radius: 10px !important;
+  border: 1.5px solid var(--border) !important;
+  background: var(--bg) !important;
+  color: var(--text) !important;
+  font-size: 14px !important;
+  outline: none !important;
+  font-family: inherit !important;
+  transition: border-color 0.2s ease !important;
+}
+
+.poe-choice-name-input:focus {
+  border-color: var(--btn) !important;
+  box-shadow: 0 0 0 3px rgba(108, 92, 231, 0.15) !important;
+}
+
+/* 💰 CHOICE EXTRA PRICE BOX */
+.poe-choice-price-wrapper {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  background: var(--bg);
+  border: 1.5px solid var(--border);
+  border-radius: 10px;
+  padding: 0 10px;
+  height: 43px;
+  box-sizing: border-box;
+  flex-shrink: 0;
+  width: 135px;
+  transition: all 0.2s ease;
+}
+
+.poe-choice-price-wrapper:focus-within {
+  border-color: #22c55e;
+  box-shadow: 0 0 0 3px rgba(34, 197, 94, 0.15);
+}
+
+.poe-choice-price-plus {
+  font-weight: 700;
+  color: #22c55e;
+  font-size: 15px;
+  line-height: 1;
+  user-select: none;
+}
+
+.poe-choice-price-input {
+  width: 100% !important;
+  min-width: 0 !important;
+  border: none !important;
+  background: transparent !important;
+  padding: 0 !important;
+  margin: 0 !important;
+  font-size: 14px !important;
+  font-weight: 700 !important;
+  color: var(--text) !important;
+  text-align: center !important;
+  outline: none !important;
+  box-shadow: none !important;
+  font-family: inherit !important;
+}
+
+.poe-choice-price-input::-webkit-outer-spin-button,
+.poe-choice-price-input::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+.poe-choice-price-input[type="number"] {
+  -moz-appearance: textfield;
+}
+
+.poe-choice-price-unit {
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--sub);
+  white-space: nowrap;
+  user-select: none;
+}
+
+/* ❌ Remove Choice Button (Compact and perfectly proportioned) */
+.poe-remove-choice-btn {
+  width: 32px !important;
+  height: 32px !important;
+  min-width: 32px !important;
+  max-width: 32px !important;
+  padding: 0 !important;
+  margin: 0 !important;
+  border-radius: 8px !important;
+  border: 1px solid rgba(239, 68, 68, 0.3) !important;
+  background: rgba(239, 68, 68, 0.08) !important;
+  color: #ef4444 !important;
+  font-size: 13px !important;
+  font-weight: 700 !important;
+  line-height: 1 !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  cursor: pointer !important;
+  flex-shrink: 0 !important;
+  box-shadow: none !important;
+  transition: all 0.2s ease !important;
+}
+
+.poe-remove-choice-btn:hover:not(:disabled) {
+  background: #ef4444 !important;
+  color: #ffffff !important;
+  border-color: #ef4444 !important;
+  transform: scale(1.05);
+}
+
+.poe-remove-choice-btn:disabled {
+  opacity: 0.25 !important;
+  cursor: not-allowed !important;
+  background: transparent !important;
+  border-color: var(--border) !important;
+  color: var(--sub) !important;
+  box-shadow: none !important;
+}
+
+.poe-add-choice-btn {
+  background: transparent !important;
+  color: var(--btn) !important;
+  border: 1.5px dashed var(--btn) !important;
+  padding: 9px 14px !important;
+  border-radius: 9px !important;
+  font-size: 13px !important;
+  font-weight: 600 !important;
+  cursor: pointer !important;
+  transition: all 0.2s ease !important;
+  width: 100% !important;
+  box-shadow: none !important;
+  margin-top: 0 !important;
+}
+
+.poe-add-choice-btn:hover {
+  background: rgba(108, 92, 231, 0.12) !important;
+}
+
+.poe-add-group-btn {
+  background: linear-gradient(135deg, rgba(108, 92, 231, 0.15), rgba(162, 155, 254, 0.15)) !important;
+  color: var(--text) !important;
+  border: 1.5px dashed var(--btn) !important;
+  padding: 12px 18px !important;
+  border-radius: 12px !important;
+  font-size: 14px !important;
+  font-weight: 700 !important;
+  cursor: pointer !important;
+  transition: all 0.2s ease !important;
+  width: 100% !important;
+  box-shadow: none !important;
+  margin-top: 0 !important;
+}
+
+.poe-add-group-btn:hover {
+  background: var(--btn) !important;
+  color: #ffffff !important;
+  border-style: solid !important;
+}
+
+/* 📱 Responsive rules */
+@media (max-width: 520px) {
+  .poe-choice-row {
+    flex-wrap: wrap;
+    gap: 6px;
+    background: var(--bg);
+    padding: 8px;
+    border-radius: 10px;
+    border: 1px solid var(--border);
+  }
+
+  .poe-choice-num {
+    display: none;
+  }
+
+  .poe-choice-name-wrapper {
+    flex: 1 1 100%;
+  }
+
+  .poe-choice-price-wrapper {
+    flex: 1;
+    width: auto;
+    height: 38px;
+  }
+
+  .poe-remove-choice-btn {
+    height: 38px !important;
+    width: 38px !important;
+    max-width: 38px !important;
+  }
+}
+

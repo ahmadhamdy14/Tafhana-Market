@@ -261,13 +261,40 @@ const AdminOrders = () => {
             <div className="modal-section">
               <h3 className="modal-section-title">🛍 المنتجات</h3>
               <div className="modal-items">
-                {selected.items?.map((item) => {
+                {selected.items?.map((item, idx) => {
                   const finalPrice = item.price - (item.price * (item.discount || 0)) / 100;
+                  const itemKey = item.cartItemId || `${item.id}-${idx}`;
+                  const hasOptions =
+                    item.selectedOptions &&
+                    typeof item.selectedOptions === "object" &&
+                    Object.keys(item.selectedOptions).length > 0;
+
                   return (
-                    <div className="modal-item" key={item.id}>
+                    <div className="modal-item" key={itemKey}>
                       <img src={item.image} alt={item.name} className="modal-item-img" />
                       <div className="modal-item-info">
                         <span className="modal-item-name">{item.name}</span>
+                        {hasOptions && (
+                          <div className="admin-order-item-options">
+                            {Object.entries(item.selectedOptions).map(([g, v]) => {
+                              const grp = Array.isArray(item.options) ? item.options.find((o) => o.name === g) : null;
+                              const choiceObj = grp?.choices?.find(
+                                (c) => (typeof c === "object" && c !== null ? c.name : c) === v
+                              );
+                              const extra = Number(choiceObj?.price) || 0;
+                              return (
+                                <span key={g} className="admin-option-tag">
+                                  {g}: <strong>{v}</strong>
+                                  {extra > 0 && (
+                                    <small style={{ marginRight: "4px", color: "#10b981", fontWeight: "700" }}>
+                                      (+{extra} ج)
+                                    </small>
+                                  )}
+                                </span>
+                              );
+                            })}
+                          </div>
+                        )}
                         {item.discount > 0 && (
                           <span className="modal-item-discount">خصم {item.discount}%</span>
                         )}

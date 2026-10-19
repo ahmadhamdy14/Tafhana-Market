@@ -19,7 +19,7 @@ const PRODUCTS_COLLECTION = "products";
  * Generate a list of searchable lowercase keyword prefixes for a product name and description.
  * Allows prefix-based matching on any word in the name or description, case-insensitively.
  */
-export const generateKeywords = (name = "", description = "") => {
+export const generateKeywords = (name = "", description = "", options = []) => {
   const nameLower = name.toLowerCase().trim();
   const descLower = description.toLowerCase().trim();
   const keywords = new Set();
@@ -49,6 +49,37 @@ export const generateKeywords = (name = "", description = "") => {
       if (!cleanWord) continue;
       for (let i = 1; i <= cleanWord.length; i++) {
         keywords.add(cleanWord.slice(0, i));
+      }
+    }
+  }
+
+  // 4. Generate prefixes of words in option group names and choices
+  if (Array.isArray(options)) {
+    for (const opt of options) {
+      if (opt && opt.name) {
+        const optWords = String(opt.name).toLowerCase().trim().split(/\s+/).filter(Boolean);
+        for (const word of optWords) {
+          const cleanWord = word.replace(/[.,\/#!$%\^&\*;:{}=\-_`~()?"']/g, "");
+          if (!cleanWord) continue;
+          for (let i = 1; i <= cleanWord.length; i++) {
+            keywords.add(cleanWord.slice(0, i));
+          }
+        }
+      }
+      if (opt && Array.isArray(opt.choices)) {
+        for (const choice of opt.choices) {
+          if (!choice) continue;
+          const choiceText = typeof choice === "object" && choice !== null ? choice.name : choice;
+          if (!choiceText) continue;
+          const choiceWords = String(choiceText).toLowerCase().trim().split(/\s+/).filter(Boolean);
+          for (const word of choiceWords) {
+            const cleanWord = word.replace(/[.,\/#!$%\^&\*;:{}=\-_`~()?"']/g, "");
+            if (!cleanWord) continue;
+            for (let i = 1; i <= cleanWord.length; i++) {
+              keywords.add(cleanWord.slice(0, i));
+            }
+          }
+        }
       }
     }
   }
