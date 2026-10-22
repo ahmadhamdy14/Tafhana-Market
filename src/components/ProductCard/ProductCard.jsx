@@ -1,4 +1,4 @@
-import { useState, useContext } from "react";
+import { useState, useContext, useRef, useEffect } from "react";
 import { Link } from "react-router-dom";
 import { toast } from "react-toastify";
 import { CartContext, calculateOptionsExtraPrice } from "../../context/CartContext";
@@ -12,6 +12,14 @@ export default function ProductCard({ product, isAdmin = false, onDeleteClick })
   const [selectedOptions, setSelectedOptions] = useState({});
   const [validationErrors, setValidationErrors] = useState({});
   const [clicked, setClicked] = useState(false);
+  const [expandedGroups, setExpandedGroups] = useState({});
+  const timerRef = useRef(null);
+
+  useEffect(() => {
+    return () => {
+      if (timerRef.current) clearTimeout(timerRef.current);
+    };
+  }, []);
 
   const hasOptions = Array.isArray(product.options) && product.options.length > 0;
 
@@ -29,8 +37,8 @@ export default function ProductCard({ product, isAdmin = false, onDeleteClick })
   const areRequiredSelected = !hasOptions
     ? true
     : product.options
-        .filter((g) => g.required)
-        .every((g) => selectedOptions[g.name] && String(selectedOptions[g.name]).trim() !== "");
+      .filter((g) => g.required)
+      .every((g) => selectedOptions[g.name] && String(selectedOptions[g.name]).trim() !== "");
 
   // 🎯 Find current cart item for this product + selected options combination
   const currentCartItemId = hasOptions
@@ -78,7 +86,10 @@ export default function ProductCard({ product, isAdmin = false, onDeleteClick })
 
     addToCart(product, selectedOptions);
     setClicked(true);
-    setTimeout(() => setClicked(false), 1000);
+    if (timerRef.current) clearTimeout(timerRef.current);
+    timerRef.current = setTimeout(() => {
+      setClicked(false);
+    }, 2000);
   };
 
   return (
@@ -98,9 +109,6 @@ export default function ProductCard({ product, isAdmin = false, onDeleteClick })
 
       {/* 📄 Card Body */}
       <div className="card-body">
-        <span className="category-badge">
-          {product.category || "غير مصنف"}
-        </span>
 
         <div className="card-title-row">
           <h3>{product.name}</h3>
@@ -153,33 +161,51 @@ export default function ProductCard({ product, isAdmin = false, onDeleteClick })
                   </div>
 
                   <div className="card-option-pills">
-                    {(group.choices || []).map((choice) => {
-                      const choiceName =
-                        typeof choice === "object" && choice !== null
-                          ? choice.name
-                          : String(choice);
-                      const choicePrice =
-                        typeof choice === "object" && choice !== null
-                          ? Number(choice.price) || 0
-                          : 0;
-                      const isSelected = selectedVal === choiceName;
+                    {(group.choices || [])
+                      .slice(0, expandedGroups[group.name] ? undefined : 2)
+                      .map((choice) => {
+                        const choiceName =
+                          typeof choice === "object" && choice !== null
+                            ? choice.name
+                            : String(choice);
+                        const choicePrice =
+                          typeof choice === "object" && choice !== null
+                            ? Number(choice.price) || 0
+                            : 0;
+                        const isSelected = selectedVal === choiceName;
 
-                      return (
-                        <button
-                          key={choiceName}
-                          type="button"
-                          className={`card-choice-pill ${isSelected ? "active" : ""}`}
-                          onClick={() =>
-                            handleSelectChoice(group.name, choiceName, group.required)
-                          }
-                        >
-                          <span className="choice-pill-name">{choiceName}</span>
-                          {choicePrice > 0 && (
-                            <span className="choice-extra-badge">+{choicePrice} ج</span>
-                          )}
-                        </button>
-                      );
-                    })}
+                        return (
+                          <button
+                            key={choiceName}
+                            type="button"
+                            className={`card-choice-pill ${isSelected ? "active" : ""}`}
+                            onClick={() =>
+                              handleSelectChoice(group.name, choiceName, group.required)
+                            }
+                          >
+                            <span className="choice-pill-name">{choiceName}</span>
+                            {choicePrice > 0 && (
+                              <span className="choice-extra-badge">+{choicePrice} ج</span>
+                            )}
+                          </button>
+                        );
+                      })}
+                    {(group.choices || []).length > 2 && (
+                      <button
+                        type="button"
+                        className="card-choice-pill show-more-pill"
+                        onClick={() =>
+                          setExpandedGroups((prev) => ({
+                            ...prev,
+                            [group.name]: !prev[group.name],
+                          }))
+                        }
+                      >
+                        {expandedGroups[group.name]
+                          ? "▲ أقل"
+                          : `إظهار المزيد (${(group.choices || []).length - 2}+)`}
+                      </button>
+                    )}
                   </div>
 
                   {isMissing && (
@@ -194,7 +220,7 @@ export default function ProductCard({ product, isAdmin = false, onDeleteClick })
         )}
 
         {/* 🛒 Add to Cart or Qty Box */}
-        {cartItem ? (
+        {cartItem && !clicked ? (
           <div className="qty-box">
             <button
               type="button"
@@ -217,6 +243,7 @@ export default function ProductCard({ product, isAdmin = false, onDeleteClick })
             type="button"
             className={`add-btn ${clicked ? "added" : ""}`}
             onClick={handleAddToCart}
+            disabled={clicked}
           >
             {clicked ? "✔ تمت الإضافة!" : "إضافة للسلة"}
           </button>

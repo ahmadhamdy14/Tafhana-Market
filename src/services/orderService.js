@@ -151,3 +151,27 @@ export const listenToAllOrders = (callback) => {
     callback(orders);
   });
 };
+
+/**
+ * Real-time listener specifically for newly added orders (for sound/notification).
+ * Ignores initial snapshot on load, and triggers only when a new order is added.
+ */
+export const listenToNewOrders = (onNewOrder) => {
+  const q = query(
+    collection(db, ORDERS_COLLECTION),
+    orderBy("createdAt", "desc")
+  );
+  let isInitial = true;
+  return onSnapshot(q, (snapshot) => {
+    if (isInitial) {
+      isInitial = false;
+      return;
+    }
+    snapshot.docChanges().forEach((change) => {
+      if (change.type === "added") {
+        onNewOrder({ id: change.doc.id, ...change.doc.data() });
+      }
+    });
+  });
+};
+

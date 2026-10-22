@@ -18,6 +18,7 @@ const Cart = () => {
   const [showForm, setShowForm] = useState(false);
   const [loading, setLoading] = useState(false);
   const [copied, setCopied] = useState(false);
+  const [addressError, setAddressError] = useState(false);
   const [form, setForm] = useState({
     firstName: userData?.firstName || "",
     lastName: userData?.lastName || "",
@@ -25,7 +26,6 @@ const Cart = () => {
     phone: userData?.phone || "",
     shopName: "",
     address: "",
-    notes: "",
     paymentMethod: "cash", // default
   });
 
@@ -40,6 +40,9 @@ const Cart = () => {
 
   const handleChange = (e) => {
     setForm((prev) => ({ ...prev, [e.target.name]: e.target.value }));
+    if (e.target.name === "address") {
+      setAddressError(false);
+    }
   };
 
   const PAYMENT_OPTIONS = [
@@ -58,9 +61,6 @@ const Cart = () => {
       msg += `🏪 : ${form.shopName.trim()}\n`;
     }
     msg += `📍 العنوان: ${form.address}\n`;
-    if (form.notes && form.notes.trim()) {
-      msg += `📝 ملاحظات: ${form.notes.trim()}\n`;
-    }
     msg += `💳 طريقة الدفع: ${payLabel}\n`;
     msg += `━━━━━━━━━━━━━━━\n`;
     msg += `📦 *المنتجات:*\n`;
@@ -95,6 +95,13 @@ const Cart = () => {
     e.preventDefault();
     if (cart.length === 0) return;
 
+    if (!form.address || !form.address.trim()) {
+      setAddressError(true);
+      toast.warning("برجاء إدخال العنوان 📍");
+      return;
+    }
+    setAddressError(false);
+
     setLoading(true);
     try {
       const items = cart.map((item) => ({
@@ -118,12 +125,10 @@ const Cart = () => {
           phone: form.phone,
           shopName: form.shopName ? form.shopName.trim() : "",
           address: form.address,
-          notes: form.notes ? form.notes.trim() : "",
         },
         items,
         totalPrice: parseFloat(total.toFixed(2)),
         paymentMethod: form.paymentMethod,
-        notes: form.notes ? form.notes.trim() : "",
       });
 
       // ✅ Open WhatsApp with full order details
@@ -348,16 +353,28 @@ const Cart = () => {
                   placeholder="العنوان بالتفصيل 📍"
                   value={form.address}
                   onChange={handleChange}
+                  onInvalid={(e) => e.target.setCustomValidity("برجاء إدخال العنوان بالتفصيل")}
+                  onInput={(e) => {
+                    e.target.setCustomValidity("");
+                    if (addressError) setAddressError(false);
+                  }}
+                  style={addressError ? { borderColor: "#ef4444" } : {}}
                   required
                 />
-
-                <textarea
-                  name="notes"
-                  placeholder="ملاحظات على الطلب (اختياري) 📝"
-                  value={form.notes}
-                  onChange={handleChange}
-                  rows="2"
-                />
+                {addressError && (
+                  <span
+                    style={{
+                      color: "#ef4444",
+                      fontSize: "13px",
+                      fontWeight: "600",
+                      marginTop: "-6px",
+                      marginBottom: "6px",
+                      display: "block",
+                    }}
+                  >
+                    ⚠️  برجاء إدخال العنوان بالتفصيل
+                  </span>
+                )}
 
                 <button
                   type="submit"

@@ -6,7 +6,7 @@ import { FavoritesContext } from "../../context/FavoritesContext";
 import { deleteProduct } from "../../services/productService";
 import { useProductsPagination } from "../../hooks/useProductsPagination";
 import { useProductsSearch } from "../../hooks/useProductsSearch";
-import { CATEGORIES, getCategoryBySlug, getSubcategoryBySlug } from "../../constants/categories";
+import { CATEGORIES, GROCERY_SUBCATEGORIES, getCategoryBySlug, getSubcategoryBySlug } from "../../constants/categories";
 import ProductCard from "../../components/ProductCard/ProductCard";
 import "./Products.css";
 
@@ -16,10 +16,11 @@ const Products = () => {
   const { categorySlug, subcategorySlug } = useParams();
 
   // Determine if we're viewing a grocery subcategory
-  const currentSubcategory = subcategorySlug ? getSubcategoryBySlug(subcategorySlug) : null;
+  const isAllBakala = categorySlug === "bakala" && subcategorySlug === "all";
+  const currentSubcategory = (subcategorySlug && !isAllBakala) ? getSubcategoryBySlug(subcategorySlug) : null;
 
-  // When viewing a subcategory, the parent category is always "بقالة"
-  const currentCategory = currentSubcategory
+  // When viewing a subcategory or "all bakala", the parent category is "بقالة"
+  const currentCategory = (currentSubcategory || isAllBakala)
     ? getCategoryBySlug("bakala")
     : categorySlug
       ? getCategoryBySlug(categorySlug)
@@ -27,6 +28,7 @@ const Products = () => {
 
   const categoryFilter = currentCategory ? currentCategory.name : null;
   const subcategoryFilter = currentSubcategory ? currentSubcategory.name : null;
+  const showSubcategoryPills = currentSubcategory || isAllBakala;
 
   const {
     products: normalProducts,
@@ -118,8 +120,8 @@ const Products = () => {
   };
 
   // Build the back navigation path
-  const backLink = currentSubcategory ? "/store/bakala" : "/store";
-  const backLabel = currentSubcategory ? "الرجوع إلى أقسام البقالة" : "الرجوع إلى أقسام المتجر";
+  const backLink = (currentSubcategory || isAllBakala) ? "/store/bakala" : "/store";
+  const backLabel = (currentSubcategory || isAllBakala) ? "الرجوع إلى أقسام البقالة" : "الرجوع إلى أقسام المتجر";
 
   return (
     <div className="products">
@@ -133,16 +135,26 @@ const Products = () => {
         </Link>
       </div>
 
-      {/* 🧭 Breadcrumb for subcategory */}
-      {currentSubcategory && (
+      {/* 🧭 Breadcrumb for subcategory / all bakala */}
+      {(currentSubcategory || isAllBakala) && (
         <nav className="products-breadcrumb">
           <Link to="/">الرئيسية</Link>
           <span className="products-bc-sep">/</span>
           <Link to="/store">المتجر</Link>
           <span className="products-bc-sep">/</span>
           <Link to="/store/bakala">بقالة</Link>
-          <span className="products-bc-sep">/</span>
-          <span className="products-bc-current">{currentSubcategory.name}</span>
+          {currentSubcategory && (
+            <>
+              <span className="products-bc-sep">/</span>
+              <span className="products-bc-current">{currentSubcategory.name}</span>
+            </>
+          )}
+          {isAllBakala && (
+            <>
+              <span className="products-bc-sep">/</span>
+              <span className="products-bc-current">الكل</span>
+            </>
+          )}
         </nav>
       )}
 
@@ -173,7 +185,7 @@ const Products = () => {
         )}
       </div>
 
-      {/* 🏷️ Quick Category Pills Switcher — hide when viewing subcategory */}
+      {/* 🏷️ Quick Category Pills Switcher */}
       {!currentSubcategory && (
         <div className="categories-filter">
           <Link
@@ -192,6 +204,31 @@ const Products = () => {
                 style={isActive ? { backgroundColor: cat.accentColor, borderColor: cat.accentColor } : {}}
               >
                 <span>{cat.icon}</span> {cat.name}
+              </Link>
+            );
+          })}
+        </div>
+      )}
+
+      {/* 🏷️ Subcategory Pills — shown when viewing bakala subcategory or all bakala */}
+      {showSubcategoryPills && (
+        <div className="categories-filter">
+          <Link
+            to="/store/bakala/all"
+            className={`category-btn ${isAllBakala ? "active" : ""}`}
+          >
+            🌟 الكل
+          </Link>
+          {GROCERY_SUBCATEGORIES.map((sub) => {
+            const isActive = subcategoryFilter === sub.name;
+            return (
+              <Link
+                key={sub.id}
+                to={`/store/bakala/${sub.slug}`}
+                className={`category-btn ${isActive ? "active" : ""}`}
+                style={isActive ? { backgroundColor: sub.accentColor, borderColor: sub.accentColor } : {}}
+              >
+                <span>{sub.icon}</span> {sub.name}
               </Link>
             );
           })}
@@ -253,15 +290,13 @@ const Products = () => {
               {/* ➕ Add Product (Admin Only) */}
               {userData?.role === "admin" && (
                 <Link
-                  to={`/add-product${
-                    categoryFilter
-                      ? `?category=${encodeURIComponent(categoryFilter)}${
-                          subcategoryFilter
-                            ? `&subcategory=${encodeURIComponent(subcategoryFilter)}`
-                            : ""
-                        }`
+                  to={`/add-product${categoryFilter
+                      ? `?category=${encodeURIComponent(categoryFilter)}${subcategoryFilter
+                        ? `&subcategory=${encodeURIComponent(subcategoryFilter)}`
+                        : ""
+                      }`
                       : ""
-                  }`}
+                    }`}
                   className="card add-card"
                 >
                   <div className="card-body add-card-body">

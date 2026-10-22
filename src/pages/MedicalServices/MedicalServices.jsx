@@ -133,6 +133,11 @@ export default function MedicalServices() {
 
     const { fullName, phone, address } = medicineForm;
 
+    if (!address || !address.trim()) {
+      toast.warning("برجاء إدخال العنوان 📍");
+      return;
+    }
+
     try {
       // 1. Save in Firestore orders collection exactly like a normal product order
       const items = [
@@ -204,6 +209,12 @@ export default function MedicalServices() {
     }
 
     const { patientName, phone, address, paymentMethod = "cash" } = bookingForm;
+
+    if (!address || !address.trim()) {
+      toast.warning("برجاء إدخال العنوان 📍");
+      return;
+    }
+
     const feeNum = parseInt(selectedDoctor.fee) || 0;
     const SERVICE_FEE = 10;
     const totalPrice = feeNum + SERVICE_FEE;
@@ -400,6 +411,8 @@ export default function MedicalServices() {
                   placeholder="أدخل عنوانك بالتفصيل"
                   value={medicineForm.address}
                   onChange={handleMedicineChange}
+                  onInvalid={(e) => e.target.setCustomValidity("برجاء إدخال العنوان")}
+                  onInput={(e) => e.target.setCustomValidity("")}
                   required
                 />
               </div>
@@ -524,6 +537,8 @@ export default function MedicalServices() {
                   placeholder="أدخل عنوانك بالتفصيل"
                   value={bookingForm.address}
                   onChange={handleBookingChange}
+                  onInvalid={(e) => e.target.setCustomValidity("برجاء إدخال العنوان")}
+                  onInput={(e) => e.target.setCustomValidity("")}
                   required
                 />
               </div>

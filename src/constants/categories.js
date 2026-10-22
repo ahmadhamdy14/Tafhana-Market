@@ -89,9 +89,22 @@ export const CATEGORIES = [
     borderHover: "#06b6d4",
   },
   {
+    id: "poultry",
+    slug: "poultry",
+    name: "الطيور",
+    nameEn: "Poultry",
+    tagline: "دواجن وطيور طازجة ومجمدة",
+    description: "فراخ طازجة ومجمدة، بط، حمام، أرانب، وجميع أنواع الطيور والدواجن بأفضل الأسعار.",
+    icon: "🐔",
+    image: "/categories/poultry.jpg",
+    accentColor: "#ea580c",
+    themeGradient: "linear-gradient(135deg, rgba(234, 88, 12, 0.15) 0%, rgba(194, 65, 12, 0.05) 100%)",
+    borderHover: "#ea580c",
+  },
+  {
     id: "mobiles",
     slug: "mobiles",
-    name: "موبايلات",
+    name: "خدمات الدفع الإلكتروني",
     nameEn: "Mobile & Recharge",
     tagline: "شحن رصيد، فواتير، وكروت الغاز و الكهرباء",
     description: "خدمات شحن الرصيد الفوري، كروت الشحن، سداد فواتير المحمول والإنترنت لجميع الشبكات وكروت الغاز و الكهرباء.",
@@ -215,6 +228,19 @@ export const GROCERY_SUBCATEGORIES = [
     borderHover: "#0891b2",
     parentCategory: "بقالة",
   },
+  {
+    id: "frozen-foods",
+    slug: "frozen-foods",
+    name: "المجمدات",
+    nameEn: "Frozen Foods",
+    tagline: "أطعمة مجمدة جاهزة وسريعة التحضير",
+    description: "خضروات مجمدة، لحوم ودواجن مجمدة، بيتزا، سمبوسك، أصابع سمك، وجبات جاهزة مجمدة وكل ما تحتاجه من المجمدات.",
+    icon: "🧊",
+    accentColor: "#06b6d4",
+    themeGradient: "linear-gradient(135deg, rgba(6, 182, 212, 0.15) 0%, rgba(8, 145, 178, 0.05) 100%)",
+    borderHover: "#06b6d4",
+    parentCategory: "بقالة",
+  },
 ];
 
 /**
@@ -228,7 +254,7 @@ export const GROCERY_SUBCATEGORY_NAMES = GROCERY_SUBCATEGORIES.map((s) => s.name
 export const getCategoryBySlug = (slug) => {
   if (!slug) return null;
   const decoded = decodeURIComponent(slug).toLowerCase().trim();
-  if (decoded === "موبيلات" || decoded === "موبايل" || decoded === "موبيل") {
+  if (decoded === "خدمات الدفع الإلكتروني" || decoded === "خدمات الدفع الإلكتروني" || decoded === "خدمات الدفع الإلكتروني") {
     return CATEGORIES.find((c) => c.slug === "mobiles") || null;
   }
   return (
@@ -272,8 +298,8 @@ export const getSubcategoryByName = (name) => {
 export const getCategoryByName = (name) => {
   if (!name) return null;
   const trimmed = name.trim();
-  if (trimmed === "موبيلات") {
-    return CATEGORIES.find((c) => c.name === "موبايلات") || null;
+  if (trimmed === "خدمات الدفع الإلكتروني") {
+    return CATEGORIES.find((c) => c.name === "خدمات الدفع الإلكتروني") || null;
   }
   return CATEGORIES.find((c) => c.name === trimmed) || null;
 };
@@ -284,5 +310,5 @@ export const getCategoryByName = (name) => {
 export const isOfficialCategory = (name) => {
   if (!name) return false;
   const trimmed = name.trim();
-  return OFFICIAL_CATEGORY_NAMES.includes(trimmed) || trimmed === "موبيلات";
+  return OFFICIAL_CATEGORY_NAMES.includes(trimmed) || trimmed === "خدمات الدفع الإلكتروني";
 };

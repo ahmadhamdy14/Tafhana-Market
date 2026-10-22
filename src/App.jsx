@@ -7,6 +7,7 @@ import { ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import InstallPrompt from "./components/InstallPrompt";
 import InstallButton from "./components/InstallButton/InstallButton";
+import AdminNotificationWatcher from "./components/AdminNotificationWatcher/AdminNotificationWatcher";
 
 function App() {
   return (
@@ -15,6 +16,7 @@ function App() {
         <CartProvider>
           <FavoritesProvider>
             <AppRoutes />
+            <AdminNotificationWatcher />
             <ToastContainer position="top-right" autoClose={3000} />
             <InstallPrompt />
             <InstallButton variant="floating" />

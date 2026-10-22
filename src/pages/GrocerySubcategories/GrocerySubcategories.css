@@ -406,8 +406,8 @@ body.light .subcat-icon-circle {
 /* 📱 RESPONSIVE BREAKPOINTS */
 @media (max-width: 900px) {
   .grocery-grid {
-    grid-template-columns: repeat(2, 1fr);
-    gap: 18px;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 16px;
   }
 }
 
@@ -444,116 +444,161 @@ body.light .subcat-icon-circle {
 
 @media (max-width: 600px) {
   .grocery-subcategories-container {
-    padding: 20px 10px 60px 10px;
+    padding: 20px 8px 60px 8px;
   }
 
   .grocery-hero {
-    padding: 24px 15px;
+    padding: 20px 12px;
     margin-bottom: 12px;
-    border-radius: 20px;
+    border-radius: 18px;
+  }
+
+  .grocery-hero-badge {
+    font-size: 12px;
+    padding: 4px 12px;
+    margin-bottom: 10px;
   }
 
   .grocery-hero h1 {
-    font-size: 24px;
-    margin-bottom: 8px;
+    font-size: 22px;
+    margin-bottom: 6px;
   }
 
   .grocery-hero p {
-    font-size: 13.5px;
-    margin-bottom: 15px;
+    font-size: 13px;
+    margin-bottom: 14px;
+    line-height: 1.5;
   }
 
   .grocery-nav-btn {
-    padding: 8px 14px;
-    font-size: 12.5px;
+    padding: 7px 12px;
+    font-size: 12px;
   }
 
   .grocery-breadcrumb {
-    padding: 10px 14px;
-    font-size: 12px;
+    padding: 8px 12px;
+    font-size: 11.5px;
     border-radius: 10px;
-    margin-bottom: 18px;
+    margin-bottom: 14px;
   }
 
-  /* 2 columns on mobile, same as main categories */
+  /* 3 columns on mobile as requested */
   .grocery-grid {
-    grid-template-columns: repeat(2, 1fr);
-    gap: 12px;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 8px;
   }
 
   .grocery-subcat-card {
-    border-radius: 16px;
-  }
-
-  .subcat-visual {
-    height: 100px;
-  }
-
-  .subcat-icon-circle {
-    width: 52px;
-    height: 52px;
-    font-size: 26px;
     border-radius: 14px;
   }
 
+  .subcat-visual {
+    height: 72px;
+  }
+
+  .subcat-icon-circle {
+    width: 44px;
+    height: 44px;
+    font-size: 22px;
+    border-radius: 12px;
+  }
+
+  .subcat-accent-glow {
+    width: 80px;
+    height: 80px;
+  }
+
   .subcat-card-body {
-    padding: 12px 10px;
+    padding: 8px 6px 10px 6px;
+    text-align: center;
+    align-items: center;
+  }
+
+  .subcat-title-row {
+    margin-bottom: 0;
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
   }
 
   .subcat-en-badge {
-    font-size: 8px;
-    padding: 2px 6px;
-    margin-bottom: 4px;
+    display: none;
   }
 
   .subcat-name {
-    font-size: 14px;
+    font-size: 12px;
     font-weight: 800;
+    line-height: 1.35;
+    text-align: center;
+    min-height: 32px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
   }
 
   .subcat-tagline {
-    font-size: 10.5px;
-    margin-bottom: 4px;
-    display: -webkit-box;
-    -webkit-line-clamp: 1;
-    -webkit-box-orient: vertical;
-    overflow: hidden;
+    display: none;
   }
 
   .subcat-desc {
     display: none;
   }
 
+  .subcat-card-footer {
+    width: 100%;
+    margin-top: 6px;
+  }
+
   .open-subcat-btn {
-    padding: 7px 10px;
-    font-size: 11px;
-    border-radius: 9px;
+    padding: 5px 6px;
+    font-size: 10.5px;
+    border-radius: 8px;
+    justify-content: center;
+    gap: 4px;
   }
 
   .open-subcat-btn .subcat-btn-arrow {
-    font-size: 13px;
+    font-size: 11px;
   }
 }
 
-@media (max-width: 360px) {
+@media (max-width: 380px) {
+  .grocery-subcategories-container {
+    padding: 16px 6px 50px 6px;
+  }
+
   .grocery-grid {
-    gap: 8px;
+    gap: 6px;
   }
 
   .subcat-visual {
-    height: 85px;
+    height: 64px;
+  }
+
+  .subcat-icon-circle {
+    width: 38px;
+    height: 38px;
+    font-size: 19px;
+    border-radius: 10px;
   }
 
   .subcat-card-body {
-    padding: 10px 8px;
+    padding: 6px 4px 8px 4px;
   }
 
   .subcat-name {
-    font-size: 13px;
+    font-size: 11px;
+    min-height: 30px;
   }
 
   .open-subcat-btn {
+    font-size: 9.5px;
+    padding: 4px 4px;
+    border-radius: 7px;
+  }
+
+  .open-subcat-btn .subcat-btn-arrow {
     font-size: 10px;
-    padding: 6px 8px;
   }
 }
