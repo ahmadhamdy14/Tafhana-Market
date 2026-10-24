@@ -117,6 +117,14 @@ export default function ProductCard({ product, isAdmin = false, onDeleteClick })
           )}
         </div>
 
+        {product.subcategory && (
+          <div className="card-subcat-badge-wrapper">
+            <span className="card-subcat-badge">
+              🏷️ {product.subcategory}
+            </span>
+          </div>
+        )}
+
         <p className="card-description">{product.description}</p>
 
         {/* 💰 Price Box */}

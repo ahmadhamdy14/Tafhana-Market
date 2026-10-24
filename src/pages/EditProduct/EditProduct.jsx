@@ -1,4 +1,4 @@
-﻿
+
 import { useState, useEffect } from "react";
 import "./EditProduct.css";
 import { db } from "../../firebase";
@@ -58,11 +58,7 @@ const EditProduct = () => {
             image: data.image || "",
             discount: data.discount !== undefined ? data.discount : "",
             category: isOfficial ? existingCategory : "",
-            subcategory:
-              existingCategory === "بقالة" &&
-                GROCERY_SUBCATEGORY_NAMES.includes(existingSubcategory)
-                ? existingSubcategory
-                : "",
+            subcategory: existingSubcategory || "",
           });
 
           // Load options if existing
@@ -108,20 +104,10 @@ const EditProduct = () => {
 
   const handleChange = (e) => {
     const { name, value } = e.target;
-
-    if (name === "category" && value !== "بقالة") {
-      // Clear subcategory if category is not بقالة
-      setForm({
-        ...form,
-        category: value,
-        subcategory: "",
-      });
-    } else {
-      setForm({
-        ...form,
-        [name]: value,
-      });
-    }
+    setForm((prev) => ({
+      ...prev,
+      [name]: value,
+    }));
   };
 
   const handleSubmit = async (e) => {
@@ -137,19 +123,7 @@ const EditProduct = () => {
       !OFFICIAL_CATEGORY_NAMES.includes(form.category)
     ) {
       toast.warning(
-        "الرجاء اختيار قسم رسمي صحيح من القائمة الخمسة"
-      );
-      return;
-    }
-
-    // Validate subcategory if category is بقالة
-    if (
-      form.category === "بقالة" &&
-      form.subcategory &&
-      !GROCERY_SUBCATEGORY_NAMES.includes(form.subcategory)
-    ) {
-      toast.warning(
-        "الرجاء اختيار قسم فرعي صحيح من أقسام البقالة"
+        "الرجاء اختيار قسم رسمي صحيح من القائمة"
       );
       return;
     }
@@ -204,27 +178,24 @@ const EditProduct = () => {
     try {
       setLoading(true);
 
+      const trimmedSubcategory = form.subcategory ? form.subcategory.trim() : "";
+
       const updateData = {
         name: form.name.trim(),
         price: Number(form.price),
         description: form.description ? form.description.trim() : "",
         image: form.image.trim(),
         category: form.category.trim(),
+        subcategory: trimmedSubcategory,
         discount: Number(form.discount) || 0,
         options: sanitizedOptions,
         searchKeywords: generateKeywords(
           form.name,
           form.description,
-          sanitizedOptions
+          sanitizedOptions,
+          trimmedSubcategory
         ),
       };
-
-      // Add or clear subcategory field for بقالة products
-      if (form.category === "بقالة" && form.subcategory) {
-        updateData.subcategory = form.subcategory.trim();
-      } else {
-        updateData.subcategory = "";
-      }
 
       const docRef = doc(db, "products", id);
       await updateDoc(docRef, updateData);
@@ -232,8 +203,8 @@ const EditProduct = () => {
       toast.success("تم تحديث المنتج بنجاح 🎉");
 
       // Navigate to appropriate page after edit
-      if (form.category === "بقالة" && form.subcategory) {
-        const subcat = getSubcategoryByName(form.subcategory);
+      if (form.category === "بقالة" && trimmedSubcategory) {
+        const subcat = getSubcategoryByName(trimmedSubcategory);
 
         if (subcat) {
           navigate(`/store/bakala/${subcat.slug}`);
@@ -359,25 +330,26 @@ const EditProduct = () => {
             ))}
           </select>
 
-          {/* Subcategory Dropdown (only for بقالة) */}
-          {form.category === "بقالة" && (
-            <select
+          {/* 🧺 Subcategory Input with free typing and datalist suggestions */}
+          <div className="subcategory-field-group">
+            <input
+              type="text"
               name="subcategory"
+              list="subcategories-suggestions"
+              placeholder="القسم الفرعي (اختياري - اكتب أي قسم فرعي تريده)"
               value={form.subcategory}
               onChange={handleChange}
-              className="category-select"
-            >
-              <option value="">
-                -- اختر القسم الفرعي (اختياري) --
-              </option>
-
+              autoComplete="off"
+            />
+            <datalist id="subcategories-suggestions">
               {GROCERY_SUBCATEGORY_NAMES.map((subName) => (
-                <option key={subName} value={subName}>
-                  {subName}
-                </option>
+                <option key={subName} value={subName} />
               ))}
-            </select>
-          )}
+            </datalist>
+            <small style={{ color: "var(--sub)", fontSize: "12px", display: "block", marginTop: "4px", textAlign: "right" }}>
+              💡 يمكنك كتابة أي اسم قسم فرعي، وسيتم استخدامه في البحث داخل القسم بالاسم المكتوب.
+            </small>
+          </div>
 
           <textarea
             name="description"

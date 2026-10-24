@@ -121,3 +121,9 @@
     border-radius: 20px;
   }
 }
+
+.subcategory-field-group {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+}

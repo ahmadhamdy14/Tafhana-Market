@@ -1,4 +1,4 @@
-import { useEffect, useState, useContext, useRef } from "react";
+import { useEffect, useState, useContext, useRef, useMemo } from "react";
 import { Link, useParams } from "react-router-dom";
 import { AuthContext } from "../../context/AuthContext";
 import { CartContext } from "../../context/CartContext";
@@ -30,6 +30,13 @@ const Products = () => {
   const subcategoryFilter = currentSubcategory ? currentSubcategory.name : null;
   const showSubcategoryPills = currentSubcategory || isAllBakala;
 
+  // Dynamic subcategory filter (by custom typed name or official subcategory)
+  const [selectedSubcategory, setSelectedSubcategory] = useState(subcategoryFilter || "");
+
+  useEffect(() => {
+    setSelectedSubcategory(subcategoryFilter || "");
+  }, [subcategoryFilter]);
+
   const {
     products: normalProducts,
     loading: normalLoading,
@@ -52,6 +59,18 @@ const Products = () => {
   const products = isSearchActive ? searchProducts : normalProducts;
   const loading = isSearchActive ? searchLoading : normalLoading;
   const hasMore = isSearchActive ? searchHasMore : normalHasMore;
+
+  // Collect all unique subcategories present in current products
+  const dynamicSubcategories = useMemo(() => {
+    const set = new Set();
+    products.forEach((p) => {
+      if (p.subcategory && typeof p.subcategory === "string") {
+        const trimmed = p.subcategory.trim();
+        if (trimmed) set.add(trimmed);
+      }
+    });
+    return Array.from(set);
+  }, [products]);
 
   const [clickedId, setClickedId] = useState(null);
   const { userData } = useContext(AuthContext);
@@ -235,16 +254,44 @@ const Products = () => {
         </div>
       )}
 
+      {/* 🏷️ Dynamic Subcategory Pills for current category */}
+      {currentCategory && !showSubcategoryPills && dynamicSubcategories.length > 0 && (
+        <div className="categories-filter dynamic-subcategories-filter">
+          <button
+            type="button"
+            className={`category-btn ${!selectedSubcategory ? "active" : ""}`}
+            onClick={() => setSelectedSubcategory("")}
+          >
+            🌟 الكل
+          </button>
+          {dynamicSubcategories.map((subName) => {
+            const isActive = selectedSubcategory === subName;
+            return (
+              <button
+                key={subName}
+                type="button"
+                className={`category-btn ${isActive ? "active" : ""}`}
+                onClick={() => setSelectedSubcategory(isActive ? "" : subName)}
+              >
+                🏷️ {subName}
+              </button>
+            );
+          })}
+        </div>
+      )}
+
       {/* 🔍 Search Input */}
       <div className="search-box">
         <input
           type="text"
           placeholder={
-            currentSubcategory
-              ? `ابحث داخل ${currentSubcategory.name}...`
-              : currentCategory
-                ? `ابحث داخل قسم ${currentCategory.name}...`
-                : "ابحث عن أي منتج..."
+            selectedSubcategory
+              ? `ابحث داخل ${selectedSubcategory}...`
+              : currentSubcategory
+                ? `ابحث داخل ${currentSubcategory.name}...`
+                : currentCategory
+                  ? `ابحث بالاسم أو القسم الفرعي في ${currentCategory.name}...`
+                  : "ابحث بالاسم أو القسم الفرعي عن أي منتج..."
           }
           value={search}
           onChange={(e) => setSearch(e.target.value)}
@@ -254,23 +301,27 @@ const Products = () => {
       {/* 📦 Product Grid */}
       {(() => {
         const filteredProducts = products.filter((p) => {
+          const searchLower = search.toLowerCase().trim();
           const matchSearch =
-            p.name.toLowerCase().includes(search.toLowerCase()) ||
-            p.description?.toLowerCase().includes(search.toLowerCase()) ||
+            !searchLower ||
+            p.name.toLowerCase().includes(searchLower) ||
+            p.description?.toLowerCase().includes(searchLower) ||
+            (p.subcategory && String(p.subcategory).toLowerCase().includes(searchLower)) ||
             (Array.isArray(p.options) &&
               p.options.some(
                 (opt) =>
-                  opt?.name?.toLowerCase().includes(search.toLowerCase()) ||
+                  opt?.name?.toLowerCase().includes(searchLower) ||
                   (Array.isArray(opt?.choices) &&
                     opt.choices.some((c) => {
                       const text = typeof c === "object" && c !== null ? c.name : String(c);
-                      return String(text).toLowerCase().includes(search.toLowerCase());
+                      return String(text).toLowerCase().includes(searchLower);
                     }))
               ));
           const matchCategory = !categoryFilter || p.category === categoryFilter;
 
-          // Subcategory filtering: if viewing a subcategory, only show products matching it
-          const matchSubcategory = !subcategoryFilter || p.subcategory === subcategoryFilter;
+          // Subcategory filtering: if viewing a subcategory or dynamic subcategory selected
+          const activeSub = selectedSubcategory || subcategoryFilter;
+          const matchSubcategory = !activeSub || p.subcategory === activeSub;
 
           return matchSearch && matchCategory && matchSubcategory;
         });
@@ -291,8 +342,8 @@ const Products = () => {
               {userData?.role === "admin" && (
                 <Link
                   to={`/add-product${categoryFilter
-                      ? `?category=${encodeURIComponent(categoryFilter)}${subcategoryFilter
-                        ? `&subcategory=${encodeURIComponent(subcategoryFilter)}`
+                      ? `?category=${encodeURIComponent(categoryFilter)}${selectedSubcategory || subcategoryFilter
+                        ? `&subcategory=${encodeURIComponent(selectedSubcategory || subcategoryFilter)}`
                         : ""
                       }`
                       : ""
@@ -303,8 +354,8 @@ const Products = () => {
                     <span className="plus">+</span>
                     <h3>
                       إضافة منتج
-                      {subcategoryFilter
-                        ? ` في ${subcategoryFilter}`
+                      {(selectedSubcategory || subcategoryFilter)
+                        ? ` في ${selectedSubcategory || subcategoryFilter}`
                         : categoryFilter
                           ? ` في قسم ${categoryFilter}`
                           : ""}

@@ -19,9 +19,10 @@ const PRODUCTS_COLLECTION = "products";
  * Generate a list of searchable lowercase keyword prefixes for a product name and description.
  * Allows prefix-based matching on any word in the name or description, case-insensitively.
  */
-export const generateKeywords = (name = "", description = "", options = []) => {
+export const generateKeywords = (name = "", description = "", options = [], subcategory = "") => {
   const nameLower = name.toLowerCase().trim();
   const descLower = description.toLowerCase().trim();
+  const subLower = String(subcategory || "").toLowerCase().trim();
   const keywords = new Set();
 
   // 1. Generate prefixes of the entire name
@@ -53,7 +54,22 @@ export const generateKeywords = (name = "", description = "", options = []) => {
     }
   }
 
-  // 4. Generate prefixes of words in option group names and choices
+  // 4. Generate prefixes of words in subcategory (allows searching products by their subcategory name)
+  if (subLower) {
+    for (let i = 1; i <= subLower.length; i++) {
+      keywords.add(subLower.slice(0, i));
+    }
+    const subWords = subLower.split(/\s+/).filter(Boolean);
+    for (const word of subWords) {
+      const cleanWord = word.replace(/[.,\/#!$%\^&\*;:{}=\-_`~()?"']/g, "");
+      if (!cleanWord) continue;
+      for (let i = 1; i <= cleanWord.length; i++) {
+        keywords.add(cleanWord.slice(0, i));
+      }
+    }
+  }
+
+  // 5. Generate prefixes of words in option group names and choices
   if (Array.isArray(options)) {
     for (const opt of options) {
       if (opt && opt.name) {
@@ -102,7 +118,12 @@ export const migrateProductsKeywords = async () => {
     for (const docSnap of snapshot.docs) {
       const data = docSnap.data();
       if (!data.searchKeywords) {
-        const keywords = generateKeywords(data.name || "", data.description || "");
+        const keywords = generateKeywords(
+          data.name || "",
+          data.description || "",
+          data.options || [],
+          data.subcategory || ""
+        );
         migratedCount++;
         promises.push(
           updateDoc(doc(db, PRODUCTS_COLLECTION, docSnap.id), {

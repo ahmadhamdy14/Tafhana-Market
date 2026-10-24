@@ -28,10 +28,7 @@ const AddProduct = () => {
     category: OFFICIAL_CATEGORY_NAMES.includes(categoryFromQuery)
       ? categoryFromQuery
       : "",
-    subcategory:
-      categoryFromQuery === "بقالة" && GROCERY_SUBCATEGORY_NAMES.includes(subcategoryFromQuery)
-        ? subcategoryFromQuery
-        : "",
+    subcategory: subcategoryFromQuery || "",
   });
 
   const [hasOptions, setHasOptions] = useState(false);
@@ -40,19 +37,10 @@ const AddProduct = () => {
 
   const handleChange = (e) => {
     const { name, value } = e.target;
-    if (name === "category" && value !== "بقالة") {
-      // Clear subcategory if category is not بقالة
-      setForm({
-        ...form,
-        category: value,
-        subcategory: "",
-      });
-    } else {
-      setForm({
-        ...form,
-        [name]: value,
-      });
-    }
+    setForm((prev) => ({
+      ...prev,
+      [name]: value,
+    }));
   };
 
   const handleSubmit = async (e) => {
@@ -112,30 +100,33 @@ const AddProduct = () => {
     try {
       setLoading(true);
 
+      const trimmedSubcategory = form.subcategory ? form.subcategory.trim() : "";
+
       const productData = {
         name: form.name.trim(),
         price: Number(form.price),
         description: form.description ? form.description.trim() : "",
         image: form.image.trim(),
         category: form.category.trim(),
+        subcategory: trimmedSubcategory,
         discount: Number(form.discount) || 0,
         options: sanitizedOptions,
-        searchKeywords: generateKeywords(form.name, form.description, sanitizedOptions),
+        searchKeywords: generateKeywords(
+          form.name,
+          form.description,
+          sanitizedOptions,
+          trimmedSubcategory
+        ),
         createdAt: new Date(),
       };
-
-      // Add subcategory field only for بقالة products that have a subcategory selected
-      if (form.category === "بقالة" && form.subcategory) {
-        productData.subcategory = form.subcategory.trim();
-      }
 
       await addDoc(collection(db, "products"), productData);
 
       toast.success("تمت إضافة المنتج بنجاح 🎉");
 
       // Navigate to appropriate page after add
-      if (form.category === "بقالة" && form.subcategory) {
-        const subcat = getSubcategoryByName(form.subcategory);
+      if (form.category === "بقالة" && trimmedSubcategory) {
+        const subcat = getSubcategoryByName(trimmedSubcategory);
         if (subcat) {
           navigate(`/store/bakala/${subcat.slug}`);
         } else {
@@ -216,24 +207,26 @@ const AddProduct = () => {
             ))}
           </select>
 
-          {/* 🧺 Subcategory Dropdown (only for بقالة) */}
-          {form.category === "بقالة" && (
-            <select
+          {/* 🧺 Subcategory Input with free typing and datalist suggestions */}
+          <div className="subcategory-field-group">
+            <input
+              type="text"
               name="subcategory"
+              list="subcategories-suggestions"
+              placeholder="القسم الفرعي (اختياري - اكتب أي قسم فرعي تريده)"
               value={form.subcategory}
               onChange={handleChange}
-              className="category-select"
-            >
-              <option value="">
-                -- اختر القسم الفرعي (اختياري) --
-              </option>
+              autoComplete="off"
+            />
+            <datalist id="subcategories-suggestions">
               {GROCERY_SUBCATEGORY_NAMES.map((subName) => (
-                <option key={subName} value={subName}>
-                  {subName}
-                </option>
+                <option key={subName} value={subName} />
               ))}
-            </select>
-          )}
+            </datalist>
+            <small style={{ color: "var(--sub)", fontSize: "12px", display: "block", marginTop: "4px", textAlign: "right" }}>
+              💡 يمكنك كتابة أي اسم قسم فرعي، وسيتم استخدامه في البحث داخل القسم بالاسم المكتوب.
+            </small>
+          </div>
 
           <textarea
             name="description"
