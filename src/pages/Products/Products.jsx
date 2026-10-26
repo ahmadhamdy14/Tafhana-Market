@@ -35,7 +35,7 @@ const Products = () => {
 
   useEffect(() => {
     setSelectedSubcategory(subcategoryFilter || "");
-  }, [subcategoryFilter]);
+  }, [categorySlug, subcategorySlug, categoryFilter, subcategoryFilter]);
 
   const {
     products: normalProducts,

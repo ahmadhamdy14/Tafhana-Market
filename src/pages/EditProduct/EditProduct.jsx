@@ -107,6 +107,7 @@ const EditProduct = () => {
     setForm((prev) => ({
       ...prev,
       [name]: value,
+      ...(name === "category" ? { subcategory: "" } : {}),
     }));
   };
 
