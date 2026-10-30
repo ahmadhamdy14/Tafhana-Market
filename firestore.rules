@@ -1,0 +1,81 @@
+rules_version = '2';
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // 🔒 Helper functions
+    function isAuthenticated() {
+      return request.auth != null;
+    }
+
+    function getUserData() {
+      return get(/databases/$(database)/documents/users/$(request.auth.uid)).data;
+    }
+
+    function isAdmin() {
+      return isAuthenticated() &&
+        getUserData().role == 'admin';
+    }
+
+    function isEditor() {
+      return isAuthenticated() &&
+        getUserData().role == 'editor';
+    }
+
+    function canManageProducts() {
+      return isAdmin() || isEditor();
+    }
+
+    // 🐔 Category notices (e.g. Poultry notice on /store page)
+    // Publicly readable by all visitors (authenticated or not)
+    // Writable only by authenticated admins
+    match /categoryNotices/{noticeId} {
+      allow read: if true;
+      allow write: if isAdmin();
+    }
+
+    // 👤 Users collection
+    // - Authenticated users can read user docs
+    // - Users can register their own profile with default role 'user'
+    // - Users can update their own profile, but CANNOT change their role (prevents self-promotion)
+    // - Only admins can update roles, modify other users, or delete users
+    match /users/{userId} {
+      allow read: if isAuthenticated();
+      allow create: if isAuthenticated() && (
+        isAdmin() ||
+        (request.auth.uid == userId && request.resource.data.get('role', 'user') == 'user')
+      );
+      allow update: if isAuthenticated() && (
+        isAdmin() ||
+        (request.auth.uid == userId && request.resource.data.get('role', 'user') == resource.data.get('role', 'user'))
+      );
+      allow delete: if isAdmin();
+    }
+
+    // 📦 Products collection
+    // - Publicly readable by all visitors
+    // - Create, update, and delete allowed for admins and editors
+    match /products/{productId} {
+      allow read: if true;
+      allow create, update, delete: if canManageProducts();
+    }
+
+    // 🛒 Orders collection
+    // - Users can read only their own orders; admins can read all orders
+    // - Authenticated users can place orders (including editors and regular users)
+    // - Updating and deleting orders is strictly restricted to admins
+    match /orders/{orderId} {
+      allow read: if isAuthenticated() && (resource.data.userId == request.auth.uid || isAdmin());
+      allow create: if isAuthenticated();
+      allow update, delete: if isAdmin();
+    }
+
+    // 🩺 Doctors collection (Medical services)
+    // - Publicly readable
+    // - Writable only by authenticated admins
+    match /doctors/{doctorId} {
+      allow read: if true;
+      allow write: if isAdmin();
+    }
+  }
+}

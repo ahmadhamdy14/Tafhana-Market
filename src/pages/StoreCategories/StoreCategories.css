@@ -148,6 +148,7 @@ body.light .categories-hero h1 {
               border-color 0.3s ease;
   box-shadow: 0 6px 20px rgba(0, 0, 0, 0.05);
   position: relative;
+  cursor: pointer;
 }
 
 .category-card:hover {

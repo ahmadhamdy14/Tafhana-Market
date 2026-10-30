@@ -66,3 +66,150 @@ img {
 * {
   box-sizing: border-box;
 }
+
+
+/* 🚀 COMING SOON POPUP MODAL (Shared) */
+.coming-soon-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  width: 100vw;
+  height: 100vh;
+  background: rgba(0, 0, 0, 0.7);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 9999;
+  padding: 20px;
+  animation: fadeInComingSoon 0.3s ease;
+}
+
+@keyframes fadeInComingSoon {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+.coming-soon-modal {
+  background: var(--bg-right, #1f2937);
+  color: var(--text, #ffffff);
+  padding: 40px 32px;
+  border-radius: 28px;
+  width: 100%;
+  max-width: 380px;
+  text-align: center;
+  box-shadow: 0 25px 60px -15px rgba(0, 0, 0, 0.6), 0 0 35px rgba(234, 88, 12, 0.2);
+  border: 1px solid var(--border, rgba(255, 255, 255, 0.12));
+  animation: scaleUpComingSoon 0.35s cubic-bezier(0.16, 1, 0.3, 1);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 14px;
+  direction: rtl;
+  user-select: none;
+}
+
+@keyframes scaleUpComingSoon {
+  from {
+    transform: scale(0.88);
+    opacity: 0;
+  }
+  to {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+
+.coming-soon-icon {
+  font-size: 68px;
+  line-height: 1;
+  margin-bottom: 6px;
+  filter: drop-shadow(0 4px 12px rgba(234, 88, 12, 0.35));
+  animation: bounceGentle 2.2s infinite ease-in-out;
+}
+
+@keyframes bounceGentle {
+  0%, 100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-8px);
+  }
+}
+
+.coming-soon-title {
+  font-size: 24px;
+  font-weight: 800;
+  color: var(--text, #ffffff);
+  margin: 0;
+  letter-spacing: -0.5px;
+}
+
+.coming-soon-desc {
+  font-size: 16px;
+  font-weight: 600;
+  color: var(--sub, #9ca3af);
+  margin: 0 0 10px 0;
+  line-height: 1.5;
+}
+
+.coming-soon-btn {
+  width: 100%;
+  padding: 13px 24px;
+  background: linear-gradient(135deg, #ea580c, #c2410c);
+  color: #ffffff;
+  border: none;
+  border-radius: 14px;
+  font-size: 16px;
+  font-weight: 700;
+  font-family: inherit;
+  cursor: pointer;
+  transition: all 0.25s ease;
+  box-shadow: 0 4px 16px rgba(234, 88, 12, 0.4);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  text-decoration: none;
+}
+
+.coming-soon-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 24px rgba(234, 88, 12, 0.55);
+  background: linear-gradient(135deg, #f97316, #ea580c);
+}
+
+.coming-soon-btn:active {
+  transform: translateY(0);
+}
+
+@media (max-width: 480px) {
+  .coming-soon-modal {
+    padding: 32px 20px;
+    max-width: 320px;
+    border-radius: 22px;
+  }
+
+  .coming-soon-icon {
+    font-size: 56px;
+  }
+
+  .coming-soon-title {
+    font-size: 20px;
+  }
+
+  .coming-soon-desc {
+    font-size: 15px;
+  }
+
+  .coming-soon-btn {
+    font-size: 15px;
+    padding: 12px 20px;
+  }
+}

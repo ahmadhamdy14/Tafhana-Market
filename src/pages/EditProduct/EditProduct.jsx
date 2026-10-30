@@ -283,6 +283,8 @@ const EditProduct = () => {
         )}
 
         <form onSubmit={handleSubmit}>
+
+          <label htmlFor="name">اسم المنتج (مطلوب)</label>
           <input
             name="name"
             placeholder="اسم المنتج (مطلوب)"
@@ -291,6 +293,7 @@ const EditProduct = () => {
             required
           />
 
+          <label htmlFor="price">السعر بالجنيه (مطلوب)</label>
           <input
             name="price"
             placeholder="السعر بالجنيه (مطلوب)"
@@ -302,6 +305,7 @@ const EditProduct = () => {
             required
           />
 
+          <label htmlFor="discount">نسبة الخصم % (اختياري)</label>
           <input
             name="discount"
             placeholder="نسبة الخصم % (اختياري)"
@@ -313,6 +317,8 @@ const EditProduct = () => {
           />
 
           {/* Required Category Dropdown */}
+
+          <label htmlFor="category">اختر قسم المنتج (مطلوب)</label>
           <select
             name="category"
             value={form.category}
@@ -333,6 +339,8 @@ const EditProduct = () => {
 
           {/* 🧺 Subcategory Input with free typing and datalist suggestions */}
           <div className="subcategory-field-group">
+
+            <label htmlFor="subcategory">القسم الفرعي (اختياري)</label>
             <input
               type="text"
               name="subcategory"
@@ -352,6 +360,7 @@ const EditProduct = () => {
             </small>
           </div>
 
+          <label htmlFor="description"> ومواصفات المنتج</label>
           <textarea
             name="description"
             placeholder="الوصف ومواصفات المنتج"
@@ -359,6 +368,7 @@ const EditProduct = () => {
             onChange={handleChange}
           />
 
+          <label htmlFor="image">رابط الصورة (مطلوب)</label>
           <input
             name="image"
             placeholder="رابط الصورة (مطلوب)"

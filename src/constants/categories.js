@@ -103,7 +103,7 @@ export const CATEGORIES = [
   },
   {
     id: "mobiles",
-    slug: "mobiles",
+    slug: "test",
     name: "خدمات الدفع الإلكتروني",
     nameEn: "Mobile & Recharge",
     tagline: "شحن رصيد، فواتير، وكروت الغاز و الكهرباء",

@@ -1,5 +1,5 @@
 import { useEffect, useState, useContext, useRef, useMemo } from "react";
-import { Link, useParams } from "react-router-dom";
+import { Link, useParams, useNavigate } from "react-router-dom";
 import { AuthContext } from "../../context/AuthContext";
 import { CartContext } from "../../context/CartContext";
 import { FavoritesContext } from "../../context/FavoritesContext";
@@ -14,6 +14,9 @@ const WHATSAPP_NUMBER = "201104152249";
 
 const Products = () => {
   const { categorySlug, subcategorySlug } = useParams();
+  const navigate = useNavigate();
+
+  const isTestCategory = categorySlug?.toLowerCase() === "test";
 
   // Determine if we're viewing a grocery subcategory
   const isAllBakala = categorySlug === "bakala" && subcategorySlug === "all";
@@ -27,6 +30,7 @@ const Products = () => {
       : null;
 
   const categoryFilter = currentCategory ? currentCategory.name : null;
+  const paginationCategory = isTestCategory ? "__DISABLED__" : categoryFilter;
   const subcategoryFilter = currentSubcategory ? currentSubcategory.name : null;
   const showSubcategoryPills = currentSubcategory || isAllBakala;
 
@@ -43,7 +47,7 @@ const Products = () => {
     hasMore: normalHasMore,
     fetchNextPage: fetchNormalNextPage,
     deleteProductFromState: deleteNormalProduct,
-  } = useProductsPagination(categoryFilter);
+  } = useProductsPagination(paginationCategory);
 
   const {
     search,
@@ -54,11 +58,11 @@ const Products = () => {
     hasMore: searchHasMore,
     fetchNextPage: fetchSearchNextPage,
     deleteProductFromState: deleteSearchProduct,
-  } = useProductsSearch(categoryFilter);
+  } = useProductsSearch(paginationCategory);
 
-  const products = isSearchActive ? searchProducts : normalProducts;
-  const loading = isSearchActive ? searchLoading : normalLoading;
-  const hasMore = isSearchActive ? searchHasMore : normalHasMore;
+  const products = isTestCategory ? [] : (isSearchActive ? searchProducts : normalProducts);
+  const loading = isTestCategory ? false : (isSearchActive ? searchLoading : normalLoading);
+  const hasMore = isTestCategory ? false : (isSearchActive ? searchHasMore : normalHasMore);
 
   // Collect all unique subcategories present in current products
   const dynamicSubcategories = useMemo(() => {
@@ -73,7 +77,7 @@ const Products = () => {
   }, [products]);
 
   const [clickedId, setClickedId] = useState(null);
-  const { userData } = useContext(AuthContext);
+  const { userData, canManageProducts } = useContext(AuthContext);
   const { cart, addToCart, decreaseQty } = useContext(CartContext);
   const { toggleFavorite, isFavorite } = useContext(FavoritesContext);
 
@@ -255,7 +259,7 @@ const Products = () => {
       )}
 
       {/* 🏷️ Dynamic Subcategory Pills for current category */}
-      {currentCategory && !showSubcategoryPills && dynamicSubcategories.length > 0 && (
+      {!isTestCategory && currentCategory && !showSubcategoryPills && dynamicSubcategories.length > 0 && (
         <div className="categories-filter dynamic-subcategories-filter">
           <button
             type="button"
@@ -280,146 +284,175 @@ const Products = () => {
         </div>
       )}
 
-      {/* 🔍 Search Input */}
-      <div className="search-box">
-        <input
-          type="text"
-          placeholder={
-            selectedSubcategory
-              ? `ابحث داخل ${selectedSubcategory}...`
-              : currentSubcategory
-                ? `ابحث داخل ${currentSubcategory.name}...`
-                : currentCategory
-                  ? `ابحث بالاسم أو القسم الفرعي في ${currentCategory.name}...`
-                  : "ابحث بالاسم أو القسم الفرعي عن أي منتج..."
-          }
-          value={search}
-          onChange={(e) => setSearch(e.target.value)}
-        />
-      </div>
+      {!isTestCategory && (
+        <>
+          {/* 🔍 Search Input */}
+          <div className="search-box">
+            <input
+              type="text"
+              placeholder={
+                selectedSubcategory
+                  ? `ابحث داخل ${selectedSubcategory}...`
+                  : currentSubcategory
+                    ? `ابحث داخل ${currentSubcategory.name}...`
+                    : currentCategory
+                      ? `ابحث بالاسم أو القسم الفرعي في ${currentCategory.name}...`
+                      : "ابحث بالاسم أو القسم الفرعي عن أي منتج..."
+              }
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+            />
+          </div>
 
-      {/* 📦 Product Grid */}
-      {(() => {
-        const filteredProducts = products.filter((p) => {
-          const searchLower = search.toLowerCase().trim();
-          const matchSearch =
-            !searchLower ||
-            p.name.toLowerCase().includes(searchLower) ||
-            p.description?.toLowerCase().includes(searchLower) ||
-            (p.subcategory && String(p.subcategory).toLowerCase().includes(searchLower)) ||
-            (Array.isArray(p.options) &&
-              p.options.some(
-                (opt) =>
-                  opt?.name?.toLowerCase().includes(searchLower) ||
-                  (Array.isArray(opt?.choices) &&
-                    opt.choices.some((c) => {
-                      const text = typeof c === "object" && c !== null ? c.name : String(c);
-                      return String(text).toLowerCase().includes(searchLower);
-                    }))
-              ));
-          const matchCategory = !categoryFilter || p.category === categoryFilter;
+          {/* 📦 Product Grid */}
+          {(() => {
+            const filteredProducts = products.filter((p) => {
+              const searchLower = search.toLowerCase().trim();
+              const matchSearch =
+                !searchLower ||
+                p.name.toLowerCase().includes(searchLower) ||
+                p.description?.toLowerCase().includes(searchLower) ||
+                (p.subcategory && String(p.subcategory).toLowerCase().includes(searchLower)) ||
+                (Array.isArray(p.options) &&
+                  p.options.some(
+                    (opt) =>
+                      opt?.name?.toLowerCase().includes(searchLower) ||
+                      (Array.isArray(opt?.choices) &&
+                        opt.choices.some((c) => {
+                          const text = typeof c === "object" && c !== null ? c.name : String(c);
+                          return String(text).toLowerCase().includes(searchLower);
+                        }))
+                  ));
+              const matchCategory = !categoryFilter || p.category === categoryFilter;
 
-          // Subcategory filtering: if viewing a subcategory or dynamic subcategory selected
-          const activeSub = selectedSubcategory || subcategoryFilter;
-          const matchSubcategory = !activeSub || p.subcategory === activeSub;
+              // Subcategory filtering: if viewing a subcategory or dynamic subcategory selected
+              const activeSub = selectedSubcategory || subcategoryFilter;
+              const matchSubcategory = !activeSub || p.subcategory === activeSub;
 
-          return matchSearch && matchCategory && matchSubcategory;
-        });
+              return matchSearch && matchCategory && matchSubcategory;
+            });
 
-        return (
-          <>
-            <div className="products-grid">
-              {filteredProducts.map((product) => (
-                <ProductCard
-                  key={product.id}
-                  product={product}
-                  isAdmin={userData?.role === "admin"}
-                  onDeleteClick={handleDeleteClick}
-                />
-              ))}
+            return (
+              <>
+                <div className="products-grid">
+                  {filteredProducts.map((product) => (
+                    <ProductCard
+                      key={product.id}
+                      product={product}
+                      isAdmin={canManageProducts}
+                      canManageProducts={canManageProducts}
+                      onDeleteClick={handleDeleteClick}
+                    />
+                  ))}
 
-              {/* ➕ Add Product (Admin Only) */}
-              {userData?.role === "admin" && (
-                <Link
-                  to={`/add-product${categoryFilter
-                      ? `?category=${encodeURIComponent(categoryFilter)}${selectedSubcategory || subcategoryFilter
-                        ? `&subcategory=${encodeURIComponent(selectedSubcategory || subcategoryFilter)}`
+                  {/* ➕ Add Product (Admin & Editor) */}
+                  {canManageProducts && (
+                    <Link
+                      to={`/add-product${categoryFilter
+                        ? `?category=${encodeURIComponent(categoryFilter)}${selectedSubcategory || subcategoryFilter
+                          ? `&subcategory=${encodeURIComponent(selectedSubcategory || subcategoryFilter)}`
+                          : ""
+                        }`
                         : ""
-                      }`
-                      : ""
-                    }`}
-                  className="card add-card"
-                >
-                  <div className="card-body add-card-body">
-                    <span className="plus">+</span>
-                    <h3>
-                      إضافة منتج
-                      {(selectedSubcategory || subcategoryFilter)
-                        ? ` في ${selectedSubcategory || subcategoryFilter}`
-                        : categoryFilter
-                          ? ` في قسم ${categoryFilter}`
-                          : ""}
-                    </h3>
-                  </div>
-                </Link>
-              )}
-            </div>
-
-            {/* 📦 Empty state when no products match */}
-            {filteredProducts.length === 0 && !loading && (
-              <div className="search-empty-state">
-                <div className="search-empty-icon">
-                  {currentSubcategory ? currentSubcategory.icon : currentCategory ? currentCategory.icon : "🛒"}
+                        }`}
+                      className="card add-card"
+                    >
+                      <div className="card-body add-card-body">
+                        <span className="plus">+</span>
+                        <h3>
+                          إضافة منتج
+                          {(selectedSubcategory || subcategoryFilter)
+                            ? ` في ${selectedSubcategory || subcategoryFilter}`
+                            : categoryFilter
+                              ? ` في قسم ${categoryFilter}`
+                              : ""}
+                        </h3>
+                      </div>
+                    </Link>
+                  )}
                 </div>
-                <h3 className="search-empty-title">
-                  {isSearchActive && search.trim()
-                    ? `لم نجد منتجات تطابق "${search}"`
-                    : `لا توجد منتجات في هذا القسم حالياً`}
-                </h3>
-                <p className="search-empty-desc">
-                  هل تريد طلب هذا المنتج أو الاستفسار عنه؟ كلمنا عبر واتساب وسنوفر لك فوراً!
-                </p>
+
+                {/* 📦 Empty state when no products match */}
+                {filteredProducts.length === 0 && !loading && (
+                  <div className="search-empty-state">
+                    <div className="search-empty-icon">
+                      {currentSubcategory ? currentSubcategory.icon : currentCategory ? currentCategory.icon : "🛒"}
+                    </div>
+                    <h3 className="search-empty-title">
+                      {isSearchActive && search.trim()
+                        ? `لم نجد منتجات تطابق "${search}"`
+                        : `لا توجد منتجات في هذا القسم حالياً`}
+                    </h3>
+                    <p className="search-empty-desc">
+                      هل تريد طلب هذا المنتج أو الاستفسار عنه؟ كلمنا عبر واتساب وسنوفر لك فوراً!
+                    </p>
+                    <a
+                      href={`https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent(
+                        search.trim()
+                          ? `مرحبا، أبحث عن المنتج "${search}" في تفهنا ماركت هل هو متوفر؟`
+                          : `مرحبا، أود الاستفسار عن منتجات قسم ${subcategoryFilter || categoryFilter || "المتجر"}`
+                      )}`}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="search-wa-btn"
+                    >
+                      💬 اطلب المنتج عبر واتساب
+                    </a>
+                  </div>
+                )}
+              </>
+            );
+          })()}
+
+          {/* 🌀 Infinite Scroll Sentinel & Loader */}
+          <div id="sentinel" className="products-loader">
+            {loading && (
+              <div className="spinner-container">
+                <div className="loading-spinner"></div>
+                <span>جاري تحميل المنتجات...</span>
+              </div>
+            )}
+            {!hasMore && products.length > 0 && (
+              <div className="no-more-products">
                 <a
                   href={`https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent(
-                    search.trim()
-                      ? `مرحبا، أبحث عن المنتج "${search}" في تفهنا ماركت هل هو متوفر؟`
-                      : `مرحبا، أود الاستفسار عن منتجات قسم ${subcategoryFilter || categoryFilter || "المتجر"}`
+                    "مرحبا، لم أجد المنتج الذي أبحث عنه. هل يمكنكم مساعدتي؟"
                   )}`}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="search-wa-btn"
+                  className="end-list-wa-link"
                 >
-                  💬 اطلب المنتج عبر واتساب
+                  💬 لو ملقتش طلبك هنا؟ اطلبوا من علي الواتساب
                 </a>
               </div>
             )}
-          </>
-        );
-      })()}
+          </div>
+        </>
+      )}
 
-      {/* 🌀 Infinite Scroll Sentinel & Loader */}
-      <div id="sentinel" className="products-loader">
-        {loading && (
-          <div className="spinner-container">
-            <div className="loading-spinner"></div>
-            <span>جاري تحميل المنتجات...</span>
-          </div>
-        )}
-        {!hasMore && products.length > 0 && (
-          <div className="no-more-products">
-            <a
-              href={`https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent(
-                "مرحبا، لم أجد المنتج الذي أبحث عنه. هل يمكنكم مساعدتي؟"
-              )}`}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="end-list-wa-link"
+      {/* 🚀 Coming Soon Modal for "test" (Bakery) category */}
+      {isTestCategory && (
+        <div className="coming-soon-overlay" onClick={() => navigate("/")}>
+          <div
+            className="coming-soon-modal"
+            onClick={(e) => e.stopPropagation()}
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="coming-soon-title"
+          >
+            <div className="coming-soon-icon" aria-hidden="true">🔨👷‍♂️</div>
+            <h2 id="coming-soon-title" className="coming-soon-title">🚀 انتظرونا قريبًا</h2>
+            <p className="coming-soon-desc">🛍️ القسم قيد التجهيز</p>
+            <button
+              type="button"
+              className="coming-soon-btn"
+              onClick={() => navigate("/store")}
             >
-              💬 لو ملقتش طلبك هنا؟ اطلبوا من علي الواتساب
-            </a>
+              العودة للرئيسية
+            </button>
           </div>
-        )}
-      </div>
+        </div>
+      )}
 
       {/* ⚠️ Delete Confirmation Modal */}
       {showModal && (

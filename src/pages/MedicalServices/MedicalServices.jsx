@@ -364,9 +364,9 @@ export default function MedicalServices() {
         </button>
         <button
           className={`tab-btn ${activeTab === "doctors" ? "active" : ""}`}
-          onClick={() => setActiveTab("doctors")}
+        //onClick={() => setActiveTab("doctors")}
         >
-          🩺 حجز موعد طبيب
+          🚀 قريبًا سيتم تفعيل خدمة حجز المواعيد الطبية
         </button>
 
       </div>

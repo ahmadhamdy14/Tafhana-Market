@@ -1,10 +1,75 @@
-import { Link } from "react-router-dom";
+import { useContext } from "react";
+import { Link, useNavigate } from "react-router-dom";
+import { AuthContext } from "../../context/AuthContext";
 import { CATEGORIES } from "../../constants/categories";
+import PoultryNotice from "../../components/PoultryNotice/PoultryNotice";
 import "./StoreCategories.css";
 
 const WHATSAPP_NUMBER = "201104152249";
 
 export default function StoreCategories() {
+  const navigate = useNavigate();
+  const { userData } = useContext(AuthContext);
+  const isAdmin = userData?.role === "admin";
+
+  const renderCardInner = (category) => (
+    <>
+      {/* Card Image Wrap */}
+      <div className="category-image-wrapper">
+        <img
+          src={category.image}
+          alt={category.name}
+          loading="lazy"
+          onError={(e) => {
+            // Fallback to placeholder gradient if image fails to load
+            e.target.style.display = "none";
+          }}
+        />
+        <div className="category-image-overlay"></div>
+        <div className="category-icon-floating">
+          <span>{category.icon}</span>
+        </div>
+      </div>
+
+      {/* Card Body */}
+      <div className="category-card-body">
+        <div className="category-title-row">
+          <div className="title-group">
+            <span className="category-en-badge">{category.nameEn}</span>
+            <h2 className="category-name">{category.name}</h2>
+          </div>
+        </div>
+
+        <p className="category-tagline">{category.tagline}</p>
+        <p className="category-desc">{category.description}</p>
+
+        {/* 🐔 Dynamic Admin-Editable Notice for Poultry Category */}
+        {category.slug === "poultry" && (
+          <PoultryNotice isAdmin={isAdmin} />
+        )}
+
+        {/* Card Action Button */}
+        <div className="category-card-footer">
+          {category.slug === "poultry" ? (
+            <Link
+              to={`/store/${category.slug}`}
+              className="open-category-btn"
+              onClick={(e) => e.stopPropagation()}
+            >
+              <span>تصفح {category.name}</span>
+              <span className="btn-arrow">←</span>
+            </Link>
+          ) : (
+            <span className="open-category-btn">
+              <span>تصفح {category.name}</span>
+              <span className="btn-arrow">←</span>
+            </span>
+          )}
+        </div>
+      </div>
+    </>
+  );
+
   return (
     <div className="store-categories-container">
       {/* 🌟 Hero Header Banner */}
@@ -27,54 +92,43 @@ export default function StoreCategories() {
       {/* 🚀 Categories Grid */}
       <section className="categories-grid-section">
         <div className="categories-grid">
-          {CATEGORIES.map((category) => (
-            <Link
-              to={`/store/${category.slug}`}
-              key={category.id}
-              className="category-card"
-              style={{
-                "--category-accent": category.accentColor,
-              }}
-            >
-              {/* Card Image Wrap */}
-              <div className="category-image-wrapper">
-                <img
-                  src={category.image}
-                  alt={category.name}
-                  loading="lazy"
-                  onError={(e) => {
-                    // Fallback to placeholder gradient if image fails to load
-                    e.target.style.display = "none";
+          {CATEGORIES.map((category) => {
+            const isPoultry = category.slug === "poultry";
+
+            if (isPoultry) {
+              return (
+                <div
+                  key={category.id}
+                  className="category-card"
+                  style={{
+                    "--category-accent": category.accentColor,
                   }}
-                />
-                <div className="category-image-overlay"></div>
-                <div className="category-icon-floating">
-                  <span>{category.icon}</span>
+                  onClick={(e) => {
+                    // Prevent navigation if the click originated inside the poultry notice
+                    if (e.target.closest(".poultry-notice-wrapper")) {
+                      return;
+                    }
+                    navigate(`/store/${category.slug}`);
+                  }}
+                >
+                  {renderCardInner(category)}
                 </div>
-              </div>
+              );
+            }
 
-              {/* Card Body */}
-              <div className="category-card-body">
-                <div className="category-title-row">
-                  <div className="title-group">
-                    <span className="category-en-badge">{category.nameEn}</span>
-                    <h2 className="category-name">{category.name}</h2>
-                  </div>
-                </div>
-
-                <p className="category-tagline">{category.tagline}</p>
-                <p className="category-desc">{category.description}</p>
-
-                {/* Card Action Button */}
-                <div className="category-card-footer">
-                  <span className="open-category-btn">
-                    <span>تصفح {category.name}</span>
-                    <span className="btn-arrow">←</span>
-                  </span>
-                </div>
-              </div>
-            </Link>
-          ))}
+            return (
+              <Link
+                to={`/store/${category.slug}`}
+                key={category.id}
+                className="category-card"
+                style={{
+                  "--category-accent": category.accentColor,
+                }}
+              >
+                {renderCardInner(category)}
+              </Link>
+            );
+          })}
         </div>
       </section>
 

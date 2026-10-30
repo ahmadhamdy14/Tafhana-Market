@@ -132,8 +132,10 @@ const Admin = () => {
   };
 
   const sortedUsers = [...users].sort((a, b) => {
-    if (a.role === "admin" && b.role !== "admin") return -1;
-    if (a.role !== "admin" && b.role === "admin") return 1;
+    const roleWeight = { admin: 3, editor: 2, user: 1 };
+    const weightA = roleWeight[a.role] || 1;
+    const weightB = roleWeight[b.role] || 1;
+    if (weightA !== weightB) return weightB - weightA;
 
     const dateA = a.createdAt?.toDate ? a.createdAt.toDate() : new Date(a.createdAt || 0);
     const dateB = b.createdAt?.toDate ? b.createdAt.toDate() : new Date(b.createdAt || 0);
@@ -221,6 +223,7 @@ const Admin = () => {
                         className={`role-select ${user.role}`}
                       >
                         <option value="user">مستخدم</option>
+                        <option value="editor">محرر (Editor)</option>
                         <option value="admin">مشرف</option>
                       </select>
                     </td>

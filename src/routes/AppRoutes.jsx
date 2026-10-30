@@ -4,6 +4,7 @@ import Login from "../pages/Login/Login";
 import Register from "../pages/Register/Register";
 import ProtectedRoute from "./ProtectedRoute";
 import AdminRoute from "./AdminRoute";
+import ProductRoute from "./ProductRoute";
 import Admin from "../pages/Admin/Admin";
 import Products from "../pages/Products/Products";
 import StoreCategories from "../pages/StoreCategories/StoreCategories";
@@ -48,8 +49,10 @@ const AppRoutes = () => {
           {/* 🚫 Admin Only Routes */}
           <Route path="/admin" element={<AdminRoute> <Admin /> </AdminRoute>} />
           <Route path="/admin/orders" element={<AdminRoute> <AdminOrders /> </AdminRoute>} />
-          <Route path="/add-product" element={<AdminRoute> <AddProduct /> </AdminRoute>} />
-          <Route path="/edit-product/:id" element={<AdminRoute> <EditProduct /> </AdminRoute>} />
+
+          {/* 📦 Product Management Routes (Admin & Editor) */}
+          <Route path="/add-product" element={<ProductRoute> <AddProduct /> </ProductRoute>} />
+          <Route path="/edit-product/:id" element={<ProductRoute> <EditProduct /> </ProductRoute>} />
 
           {/* 🔄 Fallback */}
           <Route path="*" element={<Navigate to="/" replace />} />

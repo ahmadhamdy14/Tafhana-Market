@@ -5,9 +5,16 @@ import { CartContext, calculateOptionsExtraPrice } from "../../context/CartConte
 import { FavoritesContext } from "../../context/FavoritesContext";
 import "./ProductCard.css";
 
-export default function ProductCard({ product, isAdmin = false, onDeleteClick }) {
+export default function ProductCard({
+  product,
+  isAdmin = false,
+  canManageProducts = false,
+  onDeleteClick,
+}) {
   const { cart, addToCart, decreaseQty, getCartItemId } = useContext(CartContext);
   const { toggleFavorite, isFavorite } = useContext(FavoritesContext);
+
+  const canManage = isAdmin || canManageProducts;
 
   const [selectedOptions, setSelectedOptions] = useState({});
   const [validationErrors, setValidationErrors] = useState({});
@@ -257,8 +264,8 @@ export default function ProductCard({ product, isAdmin = false, onDeleteClick })
           </button>
         )}
 
-        {/* 🛠️ Admin Actions (Edit / Delete) */}
-        {isAdmin && (
+        {/* 🛠️ Product Management Actions (Edit / Delete) */}
+        {canManage && (
           <div className="admin-actions">
             <Link to={`/edit-product/${product.id}`} className="edit-btn">
               ✏️ تعديل

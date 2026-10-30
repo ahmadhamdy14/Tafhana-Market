@@ -1,8 +1,27 @@
-import { createContext, useEffect, useState } from "react";
+import { createContext, useContext, useEffect, useState } from "react";
 import { auth, db } from "../firebase";
 import { doc, onSnapshot } from "firebase/firestore";
 
 export const AuthContext = createContext();
+
+// 🔒 Centralized role-based permission helpers
+export const checkIsAdmin = (userDataOrRole) => {
+  if (!userDataOrRole) return false;
+  const role = typeof userDataOrRole === "string" ? userDataOrRole : userDataOrRole?.role;
+  return role === "admin";
+};
+
+export const checkIsEditor = (userDataOrRole) => {
+  if (!userDataOrRole) return false;
+  const role = typeof userDataOrRole === "string" ? userDataOrRole : userDataOrRole?.role;
+  return role === "editor";
+};
+
+export const checkCanManageProducts = (userDataOrRole) => {
+  return checkIsAdmin(userDataOrRole) || checkIsEditor(userDataOrRole);
+};
+
+export const useAuth = () => useContext(AuthContext);
 
 const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null);
@@ -49,11 +68,25 @@ const AuthProvider = ({ children }) => {
     };
   }, []);
 
+  const role = userData?.role || "user";
+  const isAdmin = role === "admin";
+  const isEditor = role === "editor";
+  const canManageProducts = isAdmin || isEditor;
+
   return (
-    <AuthContext.Provider value={{ user, userData }}>
+    <AuthContext.Provider
+      value={{
+        user,
+        userData,
+        role,
+        isAdmin,
+        isEditor,
+        canManageProducts,
+      }}
+    >
       {!loading && children}
     </AuthContext.Provider>
   );
 };
 
-export default AuthProvider;
+export default AuthProvider;
