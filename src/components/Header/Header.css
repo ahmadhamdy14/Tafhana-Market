@@ -75,13 +75,27 @@
   border: none;
   cursor: pointer;
   border-radius: 6px;
-  background-color: #5642ec;
-  color: #fff;
   transition: 0.3s;
 }
 
-.theme-btn:hover {
+/* الوضع النهاري */
+.theme-btn.light {
+  background-color: #5642ec;
+  color: #fff;
+}
+
+.theme-btn.light:hover {
   background-color: #1f03f0;
+}
+
+/* الوضع الليلي */
+.theme-btn.dark {
+  background-color: #fff;
+  color: #000;
+}
+
+.theme-btn.dark:hover {
+  background-color: #e5e5e5;
 }
 
 /* ================= CART ================= */

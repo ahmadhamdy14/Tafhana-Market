@@ -113,7 +113,21 @@ export const CATEGORIES = [
     accentColor: "#3b82f6",
     themeGradient: "linear-gradient(135deg, rgba(59, 130, 246, 0.15) 0%, rgba(37, 99, 235, 0.05) 100%)",
     borderHover: "#3b82f6",
+  },
+
+  {
+    id: "accessories",
+    slug: "test",
+    name: "إكسسوارات وهاند ميد",
+    nameEn: "Accessories & Handmade",
+    tagline: "لمسات جميلة بتفاصيل معمولة بحب",
+    description:
+      "تشكيلة مميزة من الإكسسوارات والمشغولات اليدوية، أساور، سلاسل، خواتم، شنط، كروشيه وهدايا هاند ميد.",
+    icon: "🎀",
+    image: "/categories/accessories.jpg",
+    accentColor: "#db2777",
   }
+
 ];
 
 export const OFFICIAL_CATEGORY_NAMES = CATEGORIES.map((c) => c.name);

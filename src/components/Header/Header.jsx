@@ -71,12 +71,12 @@ const Header = () => {
 
         {/* HAMBURGER & QUICK ICONS */}
         <div style={{ display: "flex", alignItems: "center", position: "relative", gap: "15px" }}>
-          <Link to="/favorites" className="cart-link" onClick={() => setOpen(false)}>
-            ❤️
-            {favoritesCount > 0 && (
-              <span className="cart-badge">{favoritesCount}</span>
-            )}
-          </Link>
+          <button
+            onClick={toggleTheme}
+            className={`theme-btn ${theme === "dark" ? "dark" : "light"}`}
+          >
+            {theme === "light" ? "🌙" : "🌞"}
+          </button>
           <Link to="/cart" className="cart-link" onClick={() => setOpen(false)}>
             🛒
             {cartCount > 0 && (
@@ -91,9 +91,12 @@ const Header = () => {
 
         {/* RIGHT SIDE */}
         <div className={`nav-right ${open ? "open" : ""}`}>
-          <button onClick={toggleTheme} className="theme-btn">
-            {theme === "light" ? "🌙" : "☀️"}
-          </button>
+          {/*   <Link to="/favorites" className="cart-link" onClick={() => setOpen(false)}>
+            ❤️
+            {favoritesCount > 0 && (
+              <span className="cart-badge">{favoritesCount}</span>
+            )}
+          </Link> */}
           {/* Install button — full label visible in desktop nav */}
           <InstallButton variant="navbar" />
           <Link to="/" onClick={() => setOpen(false)}>

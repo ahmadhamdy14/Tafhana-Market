@@ -40,6 +40,9 @@ export default function ProductCard({
   const finalPrice =
     currentBasePrice - (currentBasePrice * (product.discount || 0)) / 100;
 
+  // 🙈 Hide price if product price is 0
+  const hasPrice = (Number(product.price) || 0) > 0 || optionsExtraPrice > 0;
+
   // 🔍 Check if all required groups are satisfied
   const areRequiredSelected = !hasOptions
     ? true
@@ -102,7 +105,7 @@ export default function ProductCard({
   return (
     <div className="card product-card" dir="rtl">
       {/* ❤️ Heart Icon Toggle */}
-      <button
+      {/*  <button
         type="button"
         className="heart-btn"
         onClick={() => toggleFavorite(product)}
@@ -110,7 +113,7 @@ export default function ProductCard({
       >
         {isFavorite(product.id) ? "❤️" : "🤍"}
       </button>
-
+ */}
       {/* 🖼 Product Image */}
       <img src={product.image} alt={product.name} loading="lazy" />
 
@@ -119,7 +122,7 @@ export default function ProductCard({
 
         <div className="card-title-row">
           <h3>{product.name}</h3>
-          {product.discount > 0 && (
+          {hasPrice && product.discount > 0 && (
             <span className="badge">خصم {product.discount}%</span>
           )}
         </div>
@@ -135,19 +138,17 @@ export default function ProductCard({
         <p className="card-description">{product.description}</p>
 
         {/* 💰 Price Box */}
-        <div className="price-box">
-          {product.discount > 0 && (
-            <span className="old-price">{currentBasePrice.toFixed(0)} جنيه</span>
-          )}
-          <div className="new-price-wrapper">
-            <span className="new-price">{finalPrice.toFixed(0)} جنيه</span>
-            {optionsExtraPrice > 0 && (
-              <span className="options-extra-badge" title="سعر إضافي للخيارات المحددة">
-                (+{optionsExtraPrice} ج خيارات)
-              </span>
+        {hasPrice && (
+          <div className="price-box">
+            {product.discount > 0 && (
+              <span className="old-price">{currentBasePrice.toFixed(0)} جنيه </span>
             )}
+            <div className="new-price-wrapper">
+              <span className="new-price">{finalPrice.toFixed(0)} جنيه </span>
+
+            </div>
           </div>
-        </div>
+        )}
 
         {/* ⚙️ Product Options Section (if configured) */}
         {hasOptions && (

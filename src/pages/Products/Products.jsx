@@ -212,7 +212,7 @@ const Products = () => {
       {!currentSubcategory && (
         <div className="categories-filter">
           <Link
-            to="/products"
+            to="/store"
             className={`category-btn ${!categoryFilter ? "active" : ""}`}
           >
             🌟 الكل
@@ -237,7 +237,7 @@ const Products = () => {
       {showSubcategoryPills && (
         <div className="categories-filter">
           <Link
-            to="/store/bakala/all"
+            to="/store"
             className={`category-btn ${isAllBakala ? "active" : ""}`}
           >
             🌟 الكل
