@@ -87,6 +87,51 @@ const cartsAreEqual = (a, b) => {
   return true;
 };
 
+// ─────────────────────────────────────────────────────────────────────────────
+// ⏰ Daily Cart Reset — clears every user's cart at 5:00 AM Africa/Cairo
+// ─────────────────────────────────────────────────────────────────────────────
+
+const CART_RESET_HOUR = 5; // 5:00 AM Cairo
+
+/**
+ * Get the current cart cycle identifier based on the most recent 5:00 AM
+ * in Africa/Cairo timezone. Returns a date string like "2026-11-04".
+ *
+ * - If Cairo time is 05:00 or later → cycle date = today (Cairo).
+ * - If Cairo time is before 05:00  → cycle date = yesterday (Cairo).
+ */
+const getCurrentCartCycle = () => {
+  const now = new Date();
+  const parts = {};
+  new Intl.DateTimeFormat("en-US", {
+    timeZone: "Africa/Cairo",
+    year: "numeric",
+    month: "2-digit",
+    day: "2-digit",
+    hour: "2-digit",
+    hourCycle: "h23",
+  })
+    .formatToParts(now)
+    .forEach((p) => {
+      if (p.type !== "literal") parts[p.type] = parseInt(p.value, 10);
+    });
+
+  let { year, month, day, hour } = parts;
+
+  if (hour < CART_RESET_HOUR) {
+    // Before 5 AM Cairo — cycle belongs to the previous calendar day
+    const d = new Date(year, month - 1, day);
+    d.setDate(d.getDate() - 1);
+    year = d.getFullYear();
+    month = d.getMonth() + 1;
+    day = d.getDate();
+  }
+
+  return `${year}-${String(month).padStart(2, "0")}-${String(day).padStart(2, "0")}`;
+};
+
+// ─────────────────────────────────────────────────────────────────────────────
+
 const DEBOUNCE_MS = 800;
 
 const CartProvider = ({ children }) => {
@@ -114,6 +159,10 @@ const CartProvider = ({ children }) => {
   const userRef = useRef(user);
   userRef.current = user;
 
+  // 🕐 Cart cycle — the cycle ID the current in-memory cart belongs to.
+  // null when no user is loaded.
+  const cartCycleRef = useRef(null);
+
   /**
    * Flush any pending debounced write immediately (synchronous scheduling).
    * Used before logout / unmount so the latest state isn't lost.
@@ -130,7 +179,7 @@ const CartProvider = ({ children }) => {
         if (!cartsAreEqual(currentCart, lastSavedCartRef.current)) {
           const ref = doc(db, "users", currentUser.uid);
           // Fire-and-forget — we can't reliably await during unload.
-          setDoc(ref, { cart: currentCart }, { merge: true }).catch((err) => {
+          setDoc(ref, { cart: currentCart, cartCycle: cartCycleRef.current }, { merge: true }).catch((err) => {
             console.error("Error flushing cart to Firestore:", err);
           });
           lastSavedCartRef.current = currentCart;
@@ -147,20 +196,38 @@ const CartProvider = ({ children }) => {
     if (user) {
       isLoadedRef.current = false;
       loadedUidRef.current = null;
+      cartCycleRef.current = null;
 
       const ref = doc(db, "users", user.uid);
       getDoc(ref).then((snap) => {
         // Guard: if the user changed again while we were loading, discard.
         if (userRef.current?.uid !== user.uid) return;
 
-        if (snap.exists() && snap.data().cart) {
-          const loadedCart = snap.data().cart;
-          setCart(loadedCart);
-          lastSavedCartRef.current = loadedCart;
+        const currentCycle = getCurrentCartCycle();
+
+        if (snap.exists()) {
+          const data = snap.data();
+          const savedCycle = data.cartCycle || null;
+          const savedCart = data.cart || [];
+
+          if (!savedCycle || savedCycle === currentCycle) {
+            // Cart is current, or no cycle stored yet (grandfather existing data)
+            setCart(savedCart);
+            lastSavedCartRef.current = savedCart;
+          } else {
+            // Cycle expired — clear the cart.
+            // Set lastSavedCartRef to the OLD Firestore data so the debounced
+            // save detects a change and writes the empty cart + new cycle.
+            cartRef.current = []; // immediate ref update for flush safety
+            setCart([]);
+            lastSavedCartRef.current = savedCart;
+          }
         } else {
           setCart([]);
           lastSavedCartRef.current = [];
         }
+
+        cartCycleRef.current = currentCycle;
         loadedUidRef.current = user.uid;
         isLoadedRef.current = true;
       });
@@ -169,6 +236,7 @@ const CartProvider = ({ children }) => {
       isLoadedRef.current = false;
       loadedUidRef.current = null;
       lastSavedCartRef.current = [];
+      cartCycleRef.current = null;
     }
   }, [user, flushPendingWrite]);
 
@@ -199,7 +267,7 @@ const CartProvider = ({ children }) => {
       if (cartsAreEqual(currentCart, lastSavedCartRef.current)) return;
 
       const ref = doc(db, "users", currentUser.uid);
-      setDoc(ref, { cart: currentCart }, { merge: true })
+      setDoc(ref, { cart: currentCart, cartCycle: cartCycleRef.current }, { merge: true })
         .then(() => {
           lastSavedCartRef.current = currentCart;
         })
@@ -223,6 +291,7 @@ const CartProvider = ({ children }) => {
       flushPendingWrite();
     };
   }, [flushPendingWrite]);
+
 
   // ➕ Add to cart (supports optional selectedOptions object or item with cartItemId)
   const addToCart = (product, selectedOptions = null) => {
