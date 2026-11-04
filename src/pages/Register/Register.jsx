@@ -375,10 +375,10 @@ const Register = () => {
           <span>أو</span>
         </div>
 
-        <button className="google-btn" onClick={handleGoogleRegister} disabled={loading}>
+        {/*  <button className="google-btn" onClick={handleGoogleRegister} disabled={loading}>
           <FcGoogle className="google-icon" />
           <span>المتابعة باستخدام Google</span>
-        </button>
+        </button> */}
 
         {errors.general && (
           <p className="error" style={{ textAlign: "center", marginTop: "10px", fontSize: "14px", fontWeight: "bold" }}>

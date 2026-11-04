@@ -261,10 +261,10 @@ const Login = () => {
           <span>أو</span>
         </div>
 
-        <button className="google-btn" onClick={handleGoogleLogin} disabled={loading}>
+        {/*  <button className="google-btn" onClick={handleGoogleLogin} disabled={loading}>
           <FcGoogle className="google-icon" />
           <span>المتابعة باستخدام Google</span>
-        </button>
+        </button> */}
 
         <p className="sub-text" style={{ textAlign: "center" }}>
           ليس لديك حسابا؟ <Link to="/register" className="link">اضغط هنا</Link>
