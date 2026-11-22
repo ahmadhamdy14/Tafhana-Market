@@ -1,15 +1,16 @@
 import { useLocation } from "react-router-dom";
-import { FaPhoneAlt } from "react-icons/fa";
+import { FaWhatsapp } from "react-icons/fa";
 import "./FloatingCallButton.css";
 
-const PHONE_NUMBER = "01104152249";
-const TEL_LINK = `tel:${PHONE_NUMBER}`;
+const WHATSAPP_NUMBER = "201104152249";
+const WHATSAPP_MSG = encodeURIComponent("مرحباً، عايز أعمل أوردر 🛒");
+const WHATSAPP_LINK = `https://wa.me/${WHATSAPP_NUMBER}?text=${WHATSAPP_MSG}`;
 
 /**
  * FloatingCallButton
- * 
- * Floating call action button fixed across public & client pages of Tafahna Market.
- * Allows users to place orders directly via phone call (01104152249).
+ *
+ * Floating WhatsApp action button fixed across public & client pages of Tafahna Market.
+ * Allows users to place orders directly via WhatsApp.
  * Automatically hidden on auth/admin pages to preserve clean layout.
  */
 export default function FloatingCallButton() {
@@ -30,23 +31,24 @@ export default function FloatingCallButton() {
 
   return (
     <a
-      href={TEL_LINK}
+      href={WHATSAPP_LINK}
+      target="_blank"
+      rel="noopener noreferrer"
       className="floating-call-btn"
       dir="rtl"
-      aria-label={`عايز تعمل الأوردر مكالمة؟ اتصل بنا الآن على رقم ${PHONE_NUMBER}`}
-      title="اتصل بنا لطلب الأوردر هاتفياً"
+      aria-label="ابعتلنا على الواتس لطلب الأوردر"
+      title="اطلب عبر واتساب"
       id="floating-call-button"
     >
       <div className="floating-call-btn__icon-wrapper">
-        <FaPhoneAlt className="floating-call-btn__icon" aria-hidden="true" />
+        <FaWhatsapp className="floating-call-btn__icon" aria-hidden="true" />
         <span className="floating-call-btn__pulse" aria-hidden="true" />
       </div>
 
       <div className="floating-call-btn__content">
-        <span className="floating-call-btn__title">عايز تعمل الأوردر مكالمة؟</span>
+        <span className="floating-call-btn__title">ابعتلنا ع الواتس 💬</span>
         <span className="floating-call-btn__subtitle">
-          <span className="floating-call-btn__action">اتصل الآن:</span>{" "}
-          <bdi className="floating-call-btn__number">{PHONE_NUMBER}</bdi>
+          <span className="floating-call-btn__action">اطلب أوردرك دلوقتي</span>
         </span>
       </div>
     </a>
