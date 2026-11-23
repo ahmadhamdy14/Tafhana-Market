@@ -4,12 +4,12 @@
 
 .floating-call-btn {
   position: fixed;
-  bottom: 24px;
-  bottom: max(24px, env(safe-area-inset-bottom, 24px));
-  left: 24px;
-  left: max(24px, env(safe-area-inset-left, 24px));
+  top: 80%;
+  bottom: auto;
+  left: 10px;
+  left: max(10px, env(safe-area-inset-left, 10px));
   right: auto;
-  top: auto;
+  transform: translateY(-80%);
   z-index: 9000;
 
   display: inline-flex;
@@ -28,14 +28,13 @@
   -webkit-backdrop-filter: blur(14px);
   border: 1px solid rgba(139, 92, 246, 0.4);
   box-shadow: 0 8px 24px rgba(15, 12, 41, 0.45),
-              0 2px 10px rgba(0, 0, 0, 0.25),
-              0 0 16px rgba(139, 92, 246, 0.18);
+    0 2px 10px rgba(0, 0, 0, 0.25),
+    0 0 16px rgba(139, 92, 246, 0.18);
 
   transition: transform 0.22s cubic-bezier(0.34, 1.56, 0.64, 1),
-              box-shadow 0.22s ease,
-              border-color 0.22s ease,
-              background 0.22s ease,
-              bottom 0.3s ease;
+    box-shadow 0.22s ease,
+    border-color 0.22s ease,
+    background 0.22s ease;
   animation: floating-call-fade-in 0.45s cubic-bezier(0.34, 1.56, 0.64, 1) both;
 }
 
@@ -44,25 +43,25 @@ body.light .floating-call-btn {
   background: rgba(255, 255, 255, 0.94);
   border: 1px solid rgba(124, 58, 237, 0.25);
   box-shadow: 0 8px 26px rgba(108, 92, 231, 0.16),
-              0 2px 8px rgba(0, 0, 0, 0.05);
+    0 2px 8px rgba(0, 0, 0, 0.05);
 }
 
 /* ── Hover & Active States ────────────────────────────────── */
 .floating-call-btn:hover {
-  transform: translateY(-3px) scale(1.02);
+  transform: translateY(-80%) scale(1.02);
   border-color: rgba(34, 197, 94, 0.7);
   box-shadow: 0 12px 32px rgba(15, 12, 41, 0.55),
-              0 0 24px rgba(34, 197, 94, 0.35);
+    0 0 24px rgba(34, 197, 94, 0.35);
 }
 
 body.light .floating-call-btn:hover {
   border-color: rgba(22, 163, 74, 0.6);
   box-shadow: 0 12px 30px rgba(22, 163, 74, 0.22),
-              0 4px 12px rgba(0, 0, 0, 0.08);
+    0 4px 12px rgba(0, 0, 0, 0.08);
 }
 
 .floating-call-btn:active {
-  transform: translateY(-1px) scale(0.97);
+  transform: translateY(-80%) scale(0.97);
 }
 
 .floating-call-btn:focus-visible {
@@ -78,7 +77,7 @@ body.light .floating-call-btn:hover {
   justify-content: center;
   width: 42px;
   height: 42px;
-  border-radius: 50%;
+  border-radius: 80%;
   background: linear-gradient(135deg, #22c55e 0%, #15803d 100%);
   color: #ffffff;
   flex-shrink: 0;
@@ -98,7 +97,7 @@ body.light .floating-call-btn:hover {
 .floating-call-btn__pulse {
   position: absolute;
   inset: -3px;
-  border-radius: 50%;
+  border-radius: 80%;
   border: 2px solid rgba(34, 197, 94, 0.7);
   opacity: 0;
   pointer-events: none;
@@ -156,21 +155,16 @@ body.light .floating-call-btn__number {
   color: #15803d;
 }
 
-/* ── Stack Gracefully with Floating Install FAB ─────────── */
-body:has(.install-btn--floating) .floating-call-btn {
-  bottom: 84px;
-  bottom: calc(max(24px, env(safe-area-inset-bottom, 24px)) + 60px);
-}
-
 /* ── Entrance & Keyframe Animations ──────────────────────── */
 @keyframes floating-call-fade-in {
   from {
     opacity: 0;
-    transform: translateY(22px) scale(0.92);
+    transform: translateY(calc(-80% + 22px)) scale(0.92);
   }
+
   to {
     opacity: 1;
-    transform: translateY(0) scale(1);
+    transform: translateY(-80%) scale(1);
   }
 }
 
@@ -179,10 +173,12 @@ body:has(.install-btn--floating) .floating-call-btn {
     transform: scale(0.95);
     opacity: 0.85;
   }
-  50% {
+
+  80% {
     transform: scale(1.35);
     opacity: 0;
   }
+
   100% {
     transform: scale(1.35);
     opacity: 0;
@@ -190,21 +186,28 @@ body:has(.install-btn--floating) .floating-call-btn {
 }
 
 @keyframes phone-wiggle {
-  0%, 100% {
+
+  0%,
+  100% {
     transform: rotate(0deg);
   }
+
   15% {
     transform: rotate(-14deg);
   }
-  30% {
+
+  80% {
     transform: rotate(14deg);
   }
+
   45% {
     transform: rotate(-10deg);
   }
+
   60% {
     transform: rotate(10deg);
   }
+
   75% {
     transform: rotate(0deg);
   }
@@ -213,10 +216,8 @@ body:has(.install-btn--floating) .floating-call-btn {
 /* ── Responsive Optimization ─────────────────────────────── */
 @media (max-width: 580px) {
   .floating-call-btn {
-    bottom: 18px;
-    bottom: max(18px, env(safe-area-inset-bottom, 18px));
-    left: 14px;
-    left: max(14px, env(safe-area-inset-left, 14px));
+    left: 10px;
+    left: max(10px, env(safe-area-inset-left, 10px));
     padding: 8px 14px 8px 12px;
     gap: 10px;
     max-width: 48vw;
@@ -238,15 +239,12 @@ body:has(.install-btn--floating) .floating-call-btn {
   .floating-call-btn__subtitle {
     font-size: 11px;
   }
-
-  body:has(.install-btn--floating) .floating-call-btn {
-    bottom: 76px;
-    bottom: calc(max(18px, env(safe-area-inset-bottom, 18px)) + 58px);
-  }
 }
 
 @media (max-width: 380px) {
   .floating-call-btn {
+    left: 10px;
+    left: max(10px, env(safe-area-inset-left, 10px));
     padding: 7px 10px;
     gap: 7px;
     max-width: 47vw;
