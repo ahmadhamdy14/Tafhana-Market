@@ -1,12 +1,15 @@
 /**
  * 🛒 Official Store Categories for Tafhana Market
- * 6 main categories:
+ * Main categories include:
  * - بقالة (Groceries)
  * - وجبات سريعة (Fast Food)
+ * - الأكل البيتي (Homemade Food)
  * - طابونة (Traditional Bakery)
  * - مقلة (Roasted Nuts & Seeds)
  * - منظفات (Cleaning Products)
+ * - الطيور (Poultry)
  * - موبايلات (Mobile & Recharge)
+ * - إكسسوارات وهاند ميد (Accessories & Handmade)
  */
 
 export const CATEGORIES = [
@@ -48,6 +51,19 @@ export const CATEGORIES = [
     accentColor: "#f59e0b",
     themeGradient: "linear-gradient(135deg, rgba(245, 158, 11, 0.15) 0%, rgba(217, 119, 6, 0.05) 100%)",
     borderHover: "#f59e0b",
+  },
+  {
+    id: "homemade-food",
+    slug: "homemade-food",
+    name: "الأكل البيتي",
+    nameEn: "Homemade Food",
+    tagline: "أشهى المأكولات والأطباق البيتي الطازجة",
+    description: "أشهى الوجبات والأكلات البيتي مأكولات بنكهة البيت الأصيلة.",
+    icon: "🍲",
+    image: "/categories/homemade-food.jpg",
+    accentColor: "#f97316",
+    themeGradient: "linear-gradient(135deg, rgba(249, 115, 22, 0.15) 0%, rgba(234, 88, 12, 0.05) 100%)",
+    borderHover: "#f97316",
   },
   {
     id: "bakery",
